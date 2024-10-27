@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DBeaver LibSQL JDBC Driver
+Bundle-SymbolicName: com.dbeaver.jdbc.driver.libsql
+Bundle-Version: 1.0.0.qualifier
+Bundle-Release-Date: 20230522
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Export-Package: com.dbeaver.jdbc.libsql
+Require-Bundle: com.dbeaver.jdbc.api,
+ com.dbeaver.rpc,
+ org.jkiss.utils
+Bundle-Vendor: DBeaver Corp
+Automatic-Module-Name: com.dbeaver.jdbc.driver.libsql

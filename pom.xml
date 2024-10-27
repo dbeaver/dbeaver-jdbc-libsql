@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.dbeaver.jdbc.libsql</groupId>
+    <artifactId>jdbc-libsql</artifactId>
+    <packaging>pom</packaging>
+    <name>DBeaver LibSQL JDBC Project</name>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <parent>
+        <groupId>com.dbeaver.common</groupId>
+        <artifactId>com.dbeaver.common.main</artifactId>
+        <version>2.2.0-SNAPSHOT</version>
+        <relativePath>../dbeaver-common</relativePath>
+    </parent>
+
+    <modules>
+        <module>com.dbeaver.jdbc.driver.libsql</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

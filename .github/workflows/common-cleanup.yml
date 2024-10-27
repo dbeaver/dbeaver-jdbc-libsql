@@ -1,0 +1,14 @@
+name: Cleanup
+
+on:
+  pull_request:
+    types: [closed]
+  push:
+    branches:
+      - devel
+
+jobs:
+  delete-caches:
+    name: Cleanup
+    uses: dbeaver/dbeaver-common/.github/workflows/cleanup-caches.yml@devel
+    secrets: inherit

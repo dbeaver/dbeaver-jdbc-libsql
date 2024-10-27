@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+  push:
+    branches: [devel]
+
+jobs:
+  build:
+    uses: dbeaver/dbeaver-common/.github/workflows/mvn-package.yml@devel
+    name: Check
+    secrets: inherit
+    with:
+      project-directory: ./dbeaver-jdbc-upd/aggregate
+      project-deps: ./dbeaver-jdbc-upd/project.deps
+      timeout-minutes: 2
+
+  lint:
+    uses: dbeaver/dbeaver-common/.github/workflows/java-checkstyle.yml@devel
+    name: Check
+    secrets: inherit
