@@ -22,8 +22,12 @@ public class LSqlConstants {
 
     public static final Pattern CONNECTION_URL_EXAMPLE = Pattern.compile("jdbc:dbeaver:libsql:<server-url>");
     public static final Pattern CONNECTION_URL_PATTERN = Pattern.compile("jdbc:dbeaver:libsql:(.+)");
+
     public static final int DRIVER_VERSION_MAJOR = 1;
     public static final int DRIVER_VERSION_MINOR = 0;
+
     public static final String DRIVER_NAME = "LibSQL";
     public static final String DRIVER_INFO = "DBeaver LibSQL JDBC driver";
+
+    public static final String DEFAULT_ISO_TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 }

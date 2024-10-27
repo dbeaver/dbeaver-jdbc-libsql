@@ -1,5 +1,6 @@
 package com.dbeaver.jdbc.driver.libsql.client;
 
+import com.dbeaver.jdbc.driver.libsql.LSqlConstants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.Strictness;
@@ -19,15 +20,15 @@ import java.sql.SQLException;
  * The entry point to LibSQL client API.
  */
 public class LSqlClient {
-    public static final String DEFAULT_ISO_TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
-    private URL url;
-    private String authToken;
-    private final Gson gson = new GsonBuilder()
+    private static final Gson gson = new GsonBuilder()
         .setStrictness(Strictness.LENIENT)
-        .setDateFormat(DEFAULT_ISO_TIMESTAMP_FORMAT)
+        .setDateFormat(LSqlConstants.DEFAULT_ISO_TIMESTAMP_FORMAT)
         .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
         .create();
+
+    private final URL url;
+    private final String authToken;
 
     public LSqlClient(URL url, String authToken) {
         this.url = url;
@@ -93,7 +94,7 @@ public class LSqlClient {
         jsonWriter.flush();
     }
 
-    public static class Response {
+    private static class Response {
         public LSqlExecutionResult results;
     }
 
