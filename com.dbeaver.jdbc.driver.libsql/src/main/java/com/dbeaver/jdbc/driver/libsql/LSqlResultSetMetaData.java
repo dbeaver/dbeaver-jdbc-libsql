@@ -34,7 +34,7 @@ public class LSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LSqlSta
 
     @Override
     public int getColumnCount() throws SQLException {
-        return resultSet.getResult().getColumnNames().size();
+        return resultSet.getResult().getColumns().size();
     }
 
     @Override
@@ -74,12 +74,12 @@ public class LSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LSqlSta
 
     @Override
     public String getColumnLabel(int column) throws SQLException {
-        return resultSet.getResult().getColumnNames().get(column);
+        return resultSet.getResult().getColumns().get(column - 1);
     }
 
     @Override
     public String getColumnName(int column) throws SQLException {
-        return resultSet.getResult().getColumnNames().get(column);
+        return resultSet.getResult().getColumns().get(column - 1);
     }
 
     @Override

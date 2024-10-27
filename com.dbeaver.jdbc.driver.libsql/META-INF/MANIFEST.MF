@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: com.dbeaver.jdbc.libsql
 Require-Bundle: com.dbeaver.jdbc.api,
  com.dbeaver.rpc,
- org.jkiss.utils
+ org.jkiss.utils,
+ com.google.gson
 Bundle-Vendor: DBeaver Corp
 Automatic-Module-Name: com.dbeaver.jdbc.driver.libsql

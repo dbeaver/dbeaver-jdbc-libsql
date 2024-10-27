@@ -36,7 +36,8 @@ public class LSqlStatement extends AbstractJdbcStatement<LSqlConnection> {
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        LSqlExecutionResult result = connection.getClient().execute(sql);
+        return new LSqlResultSet(result);
     }
 
     @Override

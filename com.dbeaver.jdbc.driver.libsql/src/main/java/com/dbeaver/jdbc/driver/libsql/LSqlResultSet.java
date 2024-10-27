@@ -56,7 +56,7 @@ public class LSqlResultSet extends AbstractJdbcResultSet<LSqlStatement, LSqlResu
     private int getColumnIndex(String columnLabel) throws LSqlException {
         if (nameMap == null) {
             nameMap = new HashMap<>();
-            List<String> columns = result.getColumnNames();
+            List<String> columns = result.getColumns();
             for (int i = 0; i < columns.size(); i++) {
                 nameMap.put(columns.get(i).toUpperCase(Locale.ENGLISH), i + 1);
             }

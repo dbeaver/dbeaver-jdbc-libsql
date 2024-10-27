@@ -28,7 +28,12 @@ public class LSqlDriverTest {
         try {
             LSqlDriver driver = new LSqlDriver();
             Properties props = new Properties();
-            try (Connection connection = driver.connect("jdbc:dbeaver.libsql:http://localhost:9999", props)) {
+            try (Connection connection = driver.connect("jdbc:dbeaver:libsql:" + args[0], props)) {
+                try (Statement dbStat = connection.createStatement()) {
+                    try (ResultSet dbResult = dbStat.executeQuery("select * from testme")) {
+                        printResultSet(dbResult);
+                    }
+                }
                 DatabaseMetaData metaData = connection.getMetaData();
                 System.out.println("Driver: " + metaData.getDriverName());
                 System.out.println("Database: " + metaData.getDatabaseProductName() + " " + metaData.getDatabaseProductVersion());

@@ -20,16 +20,16 @@ import java.util.List;
 
 public class LSqlExecutionResult {
 
-    private List<String> columnNames;
+    private List<String> columns;
     private List<Object[]> rows;
     private long updateCount;
 
-    public List<String> getColumnNames() {
-        return columnNames;
+    public List<String> getColumns() {
+        return columns;
     }
 
-    public void setColumnNames(List<String> columnNames) {
-        this.columnNames = columnNames;
+    public void setColumns(List<String> columns) {
+        this.columns = columns;
     }
 
     public List<Object[]> getRows() {

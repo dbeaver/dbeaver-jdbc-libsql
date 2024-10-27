@@ -18,6 +18,9 @@ package com.dbeaver.jdbc.driver.libsql;
 
 
 import java.sql.*;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -34,8 +37,14 @@ public class LSqlDriver implements Driver {
                 "Invalid connection URL: " + url +
                 ".\nExpected URL format: " + LSqlConstants.CONNECTION_URL_EXAMPLE);
         }
+        String targetUrl = matcher.group(1);
 
-        throw new SQLFeatureNotSupportedException();
+        Map<String, Object> props = new LinkedHashMap<>();
+        for (Enumeration<?> pne = info.propertyNames(); pne.hasMoreElements(); ) {
+            String propName = pne.toString();
+            props.put(propName, info.get(propName));
+        }
+        return new LSqlConnection(this, targetUrl, props);
 /*
         UPDEndpoint endpoint = new UPDEndpoint();
         endpoint.setServerAddress(matcher.group(1));

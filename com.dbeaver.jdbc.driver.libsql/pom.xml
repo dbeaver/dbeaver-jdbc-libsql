@@ -17,6 +17,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>com.dbeaver.common</groupId>
             <artifactId>org.jkiss.utils</artifactId>
             <scope>compile</scope>
