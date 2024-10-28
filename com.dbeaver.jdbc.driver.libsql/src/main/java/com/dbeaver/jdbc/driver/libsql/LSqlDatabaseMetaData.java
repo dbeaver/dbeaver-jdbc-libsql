@@ -23,6 +23,7 @@ import org.jkiss.utils.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -105,7 +106,14 @@ public class LSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LSqlConne
 
     @Override
     public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        try (PreparedStatement dbStat = connection.prepareStatement(
+            "SELECT NULL as TABLE_CAT, NULL AS TABLE_SCHEM," +
+                "name AS TABLE_NAME,type as TABLE_TYPE, " +
+                "NULL AS REMARKS, NULL AS TYPE_CAT, NULL AS TYPE_SCHEM, NULL AS TYPE_NAME " +
+                "FROM sqlite_master")
+        ) {
+            return dbStat.executeQuery();
+        }
     }
 
 }

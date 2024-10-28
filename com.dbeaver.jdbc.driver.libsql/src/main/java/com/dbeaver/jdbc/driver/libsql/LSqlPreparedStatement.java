@@ -36,7 +36,7 @@ public class LSqlPreparedStatement extends LSqlStatement implements PreparedStat
     public LSqlPreparedStatement(
         @NotNull LSqlConnection connection, String sql) throws SQLException {
         super(connection);
-
+        this.queryText = sql;
     }
 
     protected void addParameter(int parameterIndex, Object value) {

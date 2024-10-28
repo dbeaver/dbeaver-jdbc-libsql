@@ -22,30 +22,31 @@ public class LSqlExecutionResult {
 
     private List<String> columns;
     private List<Object[]> rows;
-    private long updateCount;
+    private long rows_read;
+    private long rows_written;
+    private double query_duration_ms;
 
     public List<String> getColumns() {
         return columns;
-    }
-
-    public void setColumns(List<String> columns) {
-        this.columns = columns;
     }
 
     public List<Object[]> getRows() {
         return rows;
     }
 
-    public void setRows(List<Object[]> rows) {
-        this.rows = rows;
-    }
-
     public long getUpdateCount() {
-        return updateCount;
+        return rows_written;
     }
 
-    public void setUpdateCount(long updateCount) {
-        this.updateCount = updateCount;
+    public long getRowsRead() {
+        return rows_read;
     }
 
+    public double getRowsWritten() {
+        return rows_written;
+    }
+
+    public double getQueryDurationMs() {
+        return query_duration_ms;
+    }
 }

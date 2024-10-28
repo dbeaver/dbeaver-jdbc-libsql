@@ -27,6 +27,7 @@ import java.sql.SQLFeatureNotSupportedException;
 
 public class LSqlStatement extends AbstractJdbcStatement<LSqlConnection> {
 
+    protected String queryText;
     protected LSqlExecutionResult executionResult;
     protected LSqlResultSet resultSet;
 
@@ -96,6 +97,11 @@ public class LSqlStatement extends AbstractJdbcStatement<LSqlConnection> {
     @Override
     public int getFetchDirection() throws SQLException {
         return ResultSet.FETCH_FORWARD;
+    }
+
+    @Override
+    public ResultSet executeQuery() throws SQLException {
+        return executeQuery(queryText);
     }
 
     @Override
