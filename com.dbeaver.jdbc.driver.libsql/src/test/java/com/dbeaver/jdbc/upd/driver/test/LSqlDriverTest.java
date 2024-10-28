@@ -29,14 +29,25 @@ public class LSqlDriverTest {
             LSqlDriver driver = new LSqlDriver();
             Properties props = new Properties();
             try (Connection connection = driver.connect("jdbc:dbeaver:libsql:" + args[0], props)) {
+                DatabaseMetaData metaData = connection.getMetaData();
+                System.out.println("Driver: " + metaData.getDriverName());
+                System.out.println("Database: " + metaData.getDatabaseProductName() + " " + metaData.getDatabaseProductVersion());
+
+                System.out.println("Query:");
                 try (Statement dbStat = connection.createStatement()) {
                     try (ResultSet dbResult = dbStat.executeQuery("select * from testme")) {
                         printResultSet(dbResult);
                     }
                 }
-                DatabaseMetaData metaData = connection.getMetaData();
-                System.out.println("Driver: " + metaData.getDriverName());
-                System.out.println("Database: " + metaData.getDatabaseProductName() + " " + metaData.getDatabaseProductVersion());
+
+                System.out.println("Tables:");
+                try (ResultSet tables = metaData.getTables(null, null, null, null)) {
+                    while (tables.next()) {
+                        String tableName = tables.getString("TABLE_NAME");
+                        System.out.println("\t- " + tableName);
+                    }
+                }
+
             }
         } finally {
             System.out.println("Finished (" + (System.currentTimeMillis() - startTime) + "ms)");

@@ -73,12 +73,27 @@ public class LSqlClient {
 
     }
 
-    private HttpURLConnection openConnection() throws IOException {
+    public HttpURLConnection openConnection() throws IOException {
         HttpURLConnection conn = (HttpURLConnection) this.url.openConnection();
+        setAuthParameters(conn);
+        return conn;
+    }
+
+    public HttpURLConnection openConnection(String endpoint) throws IOException {
+        String baseURL = url.toString();
+        if (!baseURL.endsWith("/")) {
+            baseURL += "/";
+        }
+        baseURL += endpoint;
+        HttpURLConnection conn = (HttpURLConnection) new URL(baseURL).openConnection();
+        setAuthParameters(conn);
+        return conn;
+    }
+
+    private void setAuthParameters(HttpURLConnection conn) {
         if (authToken != null) {
             conn.setRequestProperty("Authorization", "Bearer " + authToken);
         }
-        return conn;
     }
 
     private void query(String[] stmts, OutputStream os) throws IOException {

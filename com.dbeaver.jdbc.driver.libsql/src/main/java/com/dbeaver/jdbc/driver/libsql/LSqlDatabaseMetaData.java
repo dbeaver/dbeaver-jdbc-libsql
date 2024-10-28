@@ -16,31 +16,56 @@
  */
 package com.dbeaver.jdbc.driver.libsql;
 
-import com.dbeaver.jdbc.driver.libsql.client.LSqlExecutionResult;
 import com.dbeaver.jdbc.model.AbstractJdbcDatabaseMetaData;
 import org.jkiss.code.NotNull;
+import org.jkiss.utils.IOUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LSqlConnection> {
 
-    private final LSqlExecutionResult metaData;
+    private static Pattern VERSION_PATTERN = Pattern.compile("(\\w+)\\s+([0-9.]+)\\s+(.+)");
+    private String serverVersion;
 
-    public LSqlDatabaseMetaData(@NotNull LSqlConnection connection, @NotNull LSqlExecutionResult metaData) {
+    public LSqlDatabaseMetaData(@NotNull LSqlConnection connection) {
         super(connection, connection.getUrl());
-        this.metaData = metaData;
+    }
+
+    private void readServerVersion() throws SQLException {
+        if (serverVersion != null) {
+            return;
+        }
+        try {
+            HttpURLConnection con = connection.getClient().openConnection("version");
+            try (InputStream is = con.getInputStream()) {
+                serverVersion = IOUtils.readLine(is);
+            }
+        } catch (IOException e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public String getDatabaseProductName() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        readServerVersion();
+        return serverVersion;
     }
 
     @Override
     public String getDatabaseProductVersion() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        readServerVersion();
+        Matcher matcher = VERSION_PATTERN.matcher(serverVersion);
+        if (matcher.matches()) {
+            return matcher.group(2);
+        }
+        return serverVersion;
     }
 
     @Override

@@ -23,7 +23,10 @@ import org.jkiss.utils.CommonUtils;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.*;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 
 public class LSqlConnection extends AbstractJdbcConnection {
@@ -98,8 +101,7 @@ public class LSqlConnection extends AbstractJdbcConnection {
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        //return new LSqlDatabaseMetaData(this, metaData);
-        throw new SQLFeatureNotSupportedException();
+        return new LSqlDatabaseMetaData(this);
     }
 
 }
