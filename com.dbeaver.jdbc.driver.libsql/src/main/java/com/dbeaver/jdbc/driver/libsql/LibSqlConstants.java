@@ -18,7 +18,7 @@ package com.dbeaver.jdbc.driver.libsql;
 
 import java.util.regex.Pattern;
 
-public class LSqlConstants {
+public class LibSqlConstants {
 
     public static final Pattern CONNECTION_URL_EXAMPLE = Pattern.compile("jdbc:dbeaver:libsql:<server-url>");
     public static final Pattern CONNECTION_URL_PATTERN = Pattern.compile("jdbc:dbeaver:libsql:(.+)");

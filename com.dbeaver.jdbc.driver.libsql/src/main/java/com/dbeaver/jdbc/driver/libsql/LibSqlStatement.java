@@ -16,7 +16,7 @@
  */
 package com.dbeaver.jdbc.driver.libsql;
 
-import com.dbeaver.jdbc.driver.libsql.client.LSqlExecutionResult;
+import com.dbeaver.jdbc.driver.libsql.client.LibSqlExecutionResult;
 import com.dbeaver.jdbc.model.AbstractJdbcStatement;
 import org.jkiss.code.NotNull;
 import org.jkiss.code.Nullable;
@@ -27,15 +27,15 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class LSqlStatement extends AbstractJdbcStatement<LSqlConnection> {
+public class LibSqlStatement extends AbstractJdbcStatement<LibSqlConnection> {
 
     protected String queryText;
     protected Map<Object, Object> parameters = new LinkedHashMap<>();
 
-    protected LSqlExecutionResult executionResult;
-    protected LSqlResultSet resultSet;
+    protected LibSqlExecutionResult executionResult;
+    protected LibSqlResultSet resultSet;
 
-    public LSqlStatement(@NotNull LSqlConnection connection) throws SQLException {
+    public LibSqlStatement(@NotNull LibSqlConnection connection) throws SQLException {
         super(connection);
     }
 
@@ -113,7 +113,7 @@ public class LSqlStatement extends AbstractJdbcStatement<LSqlConnection> {
             if (executionResult == null) {
                 throw new SQLException("No result set was returned from server");
             }
-            resultSet = new LSqlResultSet(this, executionResult);
+            resultSet = new LibSqlResultSet(this, executionResult);
         }
         return resultSet;
     }
@@ -121,7 +121,7 @@ public class LSqlStatement extends AbstractJdbcStatement<LSqlConnection> {
     @Override
     public int getUpdateCount() throws SQLException {
         if (executionResult == null) {
-            throw new LSqlException("No update count before statement execute");
+            throw new LibSqlException("No update count before statement execute");
         }
         return (int) executionResult.getUpdateCount();
     }
@@ -129,7 +129,7 @@ public class LSqlStatement extends AbstractJdbcStatement<LSqlConnection> {
     @Override
     public long getLargeUpdateCount() throws SQLException {
         if (executionResult == null) {
-            throw new LSqlException("No update count before statement execute");
+            throw new LibSqlException("No update count before statement execute");
         }
         return executionResult.getUpdateCount();
     }

@@ -25,17 +25,17 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
-public class LSqlDriver implements Driver {
+public class LibSqlDriver implements Driver {
 
     static final java.util.logging.Logger parentLogger = java.util.logging.Logger.getLogger("com.dbeaver.jdbc.upd.driver.driver");
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
-        Matcher matcher = LSqlConstants.CONNECTION_URL_PATTERN.matcher(url);
+        Matcher matcher = LibSqlConstants.CONNECTION_URL_PATTERN.matcher(url);
         if (!matcher.matches()) {
-            throw new LSqlException(
+            throw new LibSqlException(
                 "Invalid connection URL: " + url +
-                ".\nExpected URL format: " + LSqlConstants.CONNECTION_URL_EXAMPLE);
+                ".\nExpected URL format: " + LibSqlConstants.CONNECTION_URL_EXAMPLE);
         }
         String targetUrl = matcher.group(1);
 
@@ -44,7 +44,7 @@ public class LSqlDriver implements Driver {
             String propName = pne.toString();
             props.put(propName, info.get(propName));
         }
-        return new LSqlConnection(this, targetUrl, props);
+        return new LibSqlConnection(this, targetUrl, props);
 /*
         UPDEndpoint endpoint = new UPDEndpoint();
         endpoint.setServerAddress(matcher.group(1));
@@ -122,7 +122,7 @@ public class LSqlDriver implements Driver {
 
     @Override
     public boolean acceptsURL(String url) {
-        return LSqlConstants.CONNECTION_URL_PATTERN.matcher(url).matches();
+        return LibSqlConstants.CONNECTION_URL_PATTERN.matcher(url).matches();
     }
 
     @Override
@@ -134,12 +134,12 @@ public class LSqlDriver implements Driver {
 
     @Override
     public int getMajorVersion() {
-        return LSqlConstants.DRIVER_VERSION_MAJOR;
+        return LibSqlConstants.DRIVER_VERSION_MAJOR;
     }
 
     @Override
     public int getMinorVersion() {
-        return LSqlConstants.DRIVER_VERSION_MINOR;
+        return LibSqlConstants.DRIVER_VERSION_MINOR;
     }
 
     @Override
@@ -153,10 +153,10 @@ public class LSqlDriver implements Driver {
     }
 
     public String getDriverName() {
-        return LSqlConstants.DRIVER_NAME;
+        return LibSqlConstants.DRIVER_NAME;
     }
 
     public String getFullVersion() {
-        return getMajorVersion() + "." + getMinorVersion() + " (" + LSqlConstants.DRIVER_INFO + ")";
+        return getMajorVersion() + "." + getMinorVersion() + " (" + LibSqlConstants.DRIVER_INFO + ")";
     }
 }

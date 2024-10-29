@@ -18,7 +18,7 @@ package com.dbeaver.jdbc.driver.libsql.client;
 
 import java.util.List;
 
-public class LSqlExecutionResult {
+public class LibSqlExecutionResult {
 
     private List<String> columns;
     private List<Object[]> rows;

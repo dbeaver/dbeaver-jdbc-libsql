@@ -16,8 +16,8 @@
  */
 package com.dbeaver.jdbc.driver.libsql;
 
-import com.dbeaver.jdbc.driver.libsql.client.LSqlReaderInput;
-import com.dbeaver.jdbc.driver.libsql.client.LSqlStreamInput;
+import com.dbeaver.jdbc.driver.libsql.client.LibSqlReaderInput;
+import com.dbeaver.jdbc.driver.libsql.client.LibSqlStreamInput;
 import org.jkiss.code.NotNull;
 
 import java.io.InputStream;
@@ -27,10 +27,10 @@ import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
 
-public class LSqlPreparedStatement extends LSqlStatement implements PreparedStatement {
+public class LibSqlPreparedStatement extends LibSqlStatement implements PreparedStatement {
 
-    public LSqlPreparedStatement(
-        @NotNull LSqlConnection connection, String sql) throws SQLException {
+    public LibSqlPreparedStatement(
+        @NotNull LibSqlConnection connection, String sql) throws SQLException {
         super(connection);
         this.queryText = sql;
     }
@@ -115,17 +115,17 @@ public class LSqlPreparedStatement extends LSqlStatement implements PreparedStat
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x, int length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlStreamInput(x, length));
+        this.addParameter(parameterIndex, new LibSqlStreamInput(x, length));
     }
 
     @Override
     public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlStreamInput(x, length));
+        this.addParameter(parameterIndex, new LibSqlStreamInput(x, length));
     }
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlStreamInput(x, length));
+        this.addParameter(parameterIndex, new LibSqlStreamInput(x, length));
     }
 
     @Override
@@ -150,7 +150,7 @@ public class LSqlPreparedStatement extends LSqlStatement implements PreparedStat
 
     @Override
     public void setCharacterStream(int parameterIndex, Reader reader, int length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlReaderInput(reader, length));
+        this.addParameter(parameterIndex, new LibSqlReaderInput(reader, length));
     }
 
     @Override
@@ -220,7 +220,7 @@ public class LSqlPreparedStatement extends LSqlStatement implements PreparedStat
 
     @Override
     public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlReaderInput(value, length));
+        this.addParameter(parameterIndex, new LibSqlReaderInput(value, length));
     }
 
     @Override
@@ -230,17 +230,17 @@ public class LSqlPreparedStatement extends LSqlStatement implements PreparedStat
 
     @Override
     public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlReaderInput(reader, length));
+        this.addParameter(parameterIndex, new LibSqlReaderInput(reader, length));
     }
 
     @Override
     public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlStreamInput(inputStream, length));
+        this.addParameter(parameterIndex, new LibSqlStreamInput(inputStream, length));
     }
 
     @Override
     public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlReaderInput(reader, length));
+        this.addParameter(parameterIndex, new LibSqlReaderInput(reader, length));
     }
 
     @Override
@@ -255,51 +255,51 @@ public class LSqlPreparedStatement extends LSqlStatement implements PreparedStat
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlStreamInput(x, length));
+        this.addParameter(parameterIndex, new LibSqlStreamInput(x, length));
     }
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlStreamInput(x, length));
+        this.addParameter(parameterIndex, new LibSqlStreamInput(x, length));
     }
 
     @Override
     public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlReaderInput(reader, length));
+        this.addParameter(parameterIndex, new LibSqlReaderInput(reader, length));
     }
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlStreamInput(x, -1));
+        this.addParameter(parameterIndex, new LibSqlStreamInput(x, -1));
     }
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlStreamInput(x, -1));
+        this.addParameter(parameterIndex, new LibSqlStreamInput(x, -1));
     }
 
     @Override
     public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlReaderInput(reader, -1));
+        this.addParameter(parameterIndex, new LibSqlReaderInput(reader, -1));
     }
 
     @Override
     public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlReaderInput(value, -1));
+        this.addParameter(parameterIndex, new LibSqlReaderInput(value, -1));
     }
 
     @Override
     public void setClob(int parameterIndex, Reader reader) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlReaderInput(reader, -1));
+        this.addParameter(parameterIndex, new LibSqlReaderInput(reader, -1));
     }
 
     @Override
     public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlStreamInput(inputStream, -1));
+        this.addParameter(parameterIndex, new LibSqlStreamInput(inputStream, -1));
     }
 
     @Override
     public void setNClob(int parameterIndex, Reader reader) throws SQLException {
-        this.addParameter(parameterIndex, new LSqlReaderInput(reader, -1));
+        this.addParameter(parameterIndex, new LibSqlReaderInput(reader, -1));
     }
 }

@@ -1,6 +1,6 @@
 package com.dbeaver.jdbc.driver.libsql.client;
 
-import com.dbeaver.jdbc.driver.libsql.LSqlConstants;
+import com.dbeaver.jdbc.driver.libsql.LibSqlConstants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.Strictness;
@@ -26,7 +26,7 @@ public class LSqlClient {
 
     private static final Gson gson = new GsonBuilder()
         .setStrictness(Strictness.LENIENT)
-        .setDateFormat(LSqlConstants.DEFAULT_ISO_TIMESTAMP_FORMAT)
+        .setDateFormat(LibSqlConstants.DEFAULT_ISO_TIMESTAMP_FORMAT)
         .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
         .create();
 
@@ -43,7 +43,7 @@ public class LSqlClient {
      *
      * @return The result set.
      */
-    public LSqlExecutionResult execute(String stmt, Map<Object, Object> parameters) throws SQLException {
+    public LibSqlExecutionResult execute(String stmt, Map<Object, Object> parameters) throws SQLException {
         return batch(new String[]{stmt}, new Map[]{ parameters })[0];
     }
 
@@ -53,7 +53,7 @@ public class LSqlClient {
      * @param stmts The SQL statements.
      * @return The result sets.
      */
-    public LSqlExecutionResult[] batch(String[] stmts, Map<Object, Object>[] parameters) throws SQLException {
+    public LibSqlExecutionResult[] batch(String[] stmts, Map<Object, Object>[] parameters) throws SQLException {
         try {
             HttpURLConnection conn = openConnection();
             conn.setRequestMethod("POST");
@@ -65,7 +65,7 @@ public class LSqlClient {
             try (InputStreamReader in = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8)) {
                 //String responseStr = IOUtils.readToString(in);
                 Response[] response = gson.fromJson(in, Response[].class);
-                LSqlExecutionResult[] resultSets = new LSqlExecutionResult[response.length];
+                LibSqlExecutionResult[] resultSets = new LibSqlExecutionResult[response.length];
                 for (int i = 0; i < response.length; i++) {
                     if (!CommonUtils.isEmpty(response[i].error)) {
                         throw new SQLException(response[i].error);
@@ -172,7 +172,7 @@ public class LSqlClient {
 
     private static class Response {
         public String error;
-        public LSqlExecutionResult results;
+        public LibSqlExecutionResult results;
     }
 
 }

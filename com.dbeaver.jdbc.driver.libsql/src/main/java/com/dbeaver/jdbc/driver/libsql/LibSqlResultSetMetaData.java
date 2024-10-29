@@ -22,12 +22,12 @@ import org.jkiss.code.NotNull;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class LSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LSqlStatement> {
+public class LibSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LibSqlStatement> {
 
     @NotNull
-    private final LSqlResultSet resultSet;
+    private final LibSqlResultSet resultSet;
 
-    public LSqlResultSetMetaData(@NotNull LSqlResultSet resultSet) throws SQLException {
+    public LibSqlResultSetMetaData(@NotNull LibSqlResultSet resultSet) throws SQLException {
         super(resultSet.getStatement());
         this.resultSet = resultSet;
     }

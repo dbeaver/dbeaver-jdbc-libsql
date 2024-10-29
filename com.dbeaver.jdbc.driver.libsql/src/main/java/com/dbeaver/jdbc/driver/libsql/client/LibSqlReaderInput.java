@@ -16,16 +16,16 @@
  */
 package com.dbeaver.jdbc.driver.libsql.client;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import org.jkiss.utils.IOUtils;
 
-public class LSqlStreamInput {
-    private InputStream stream;
+import java.io.IOException;
+import java.io.Reader;
+
+public class LibSqlReaderInput {
+    private Reader stream;
     private long length;
 
-    public LSqlStreamInput(InputStream stream, long length) {
+    public LibSqlReaderInput(Reader stream, long length) {
         this.stream = stream;
         this.length = length;
     }
@@ -33,15 +33,13 @@ public class LSqlStreamInput {
     @Override
     public String toString() {
         try {
-            ByteArrayOutputStream result = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            for (int length; (length = stream.read(buffer)) != -1; ) {
-                result.write(buffer, 0, length);
+            String str = IOUtils.readToString(stream);
+            if (length <= 0) {
+                return str;
             }
-            return result.toString(StandardCharsets.UTF_8);
+            return str.substring(0, (int) length);
         } catch (IOException e) {
             return e.getMessage();
         }
     }
-
 }

@@ -29,18 +29,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-public class LSqlConnection extends AbstractJdbcConnection {
+public class LibSqlConnection extends AbstractJdbcConnection {
 
     @NotNull
-    private final LSqlDriver driver;
+    private final LibSqlDriver driver;
     private final LSqlClient client;
     @NotNull
     private String url;
     @NotNull
     private Map<String, Object> driverProperties;
 
-    public LSqlConnection(
-        @NotNull LSqlDriver driver,
+    public LibSqlConnection(
+        @NotNull LibSqlDriver driver,
         @NotNull String url,
         @NotNull Map<String, Object> driverProperties
     ) throws SQLException {
@@ -71,13 +71,13 @@ public class LSqlConnection extends AbstractJdbcConnection {
     }
 
     @NotNull
-    public LSqlDriver getDriver() {
+    public LibSqlDriver getDriver() {
         return driver;
     }
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        return new LSqlStatement(this);
+        return new LibSqlStatement(this);
     }
 
     @Override
@@ -86,8 +86,8 @@ public class LSqlConnection extends AbstractJdbcConnection {
     }
 
     @NotNull
-    private LSqlPreparedStatement prepareStatementImpl(String sql) throws SQLException {
-        return new LSqlPreparedStatement(this, sql);
+    private LibSqlPreparedStatement prepareStatementImpl(String sql) throws SQLException {
+        return new LibSqlPreparedStatement(this, sql);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class LSqlConnection extends AbstractJdbcConnection {
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        return new LSqlDatabaseMetaData(this);
+        return new LibSqlDatabaseMetaData(this);
     }
 
 }

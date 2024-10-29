@@ -27,12 +27,12 @@ import java.sql.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LSqlConnection> {
+public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlConnection> {
 
     private static Pattern VERSION_PATTERN = Pattern.compile("(\\w+)\\s+([0-9.]+)\\s+(.+)");
     private String serverVersion;
 
-    public LSqlDatabaseMetaData(@NotNull LSqlConnection connection) {
+    public LibSqlDatabaseMetaData(@NotNull LibSqlConnection connection) {
         super(connection, connection.getUrl());
     }
 
@@ -107,7 +107,7 @@ public class LSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LSqlConne
             "SELECT NULL as TABLE_CAT, NULL AS TABLE_SCHEM," +
                 "name AS TABLE_NAME,type as TABLE_TYPE, " +
                 "NULL AS REMARKS, NULL AS TYPE_CAT, NULL AS TYPE_SCHEM, NULL AS TYPE_NAME " +
-                "FROM sqlite_master")
+                "FROM sqlite_master WHERE type='table'")
         ) {
             return dbStat.executeQuery();
         }

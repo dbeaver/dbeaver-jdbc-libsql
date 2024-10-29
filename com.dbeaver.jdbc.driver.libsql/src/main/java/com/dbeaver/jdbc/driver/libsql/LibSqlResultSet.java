@@ -16,7 +16,7 @@
  */
 package com.dbeaver.jdbc.driver.libsql;
 
-import com.dbeaver.jdbc.driver.libsql.client.LSqlExecutionResult;
+import com.dbeaver.jdbc.driver.libsql.client.LibSqlExecutionResult;
 import com.dbeaver.jdbc.model.AbstractJdbcResultSet;
 import org.jkiss.code.NotNull;
 import org.jkiss.utils.CommonUtils;
@@ -29,26 +29,26 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class LSqlResultSet extends AbstractJdbcResultSet<LSqlStatement, LSqlResultSetMetaData> {
+public class LibSqlResultSet extends AbstractJdbcResultSet<LibSqlStatement, LibSqlResultSetMetaData> {
 
     @NotNull
-    private final LSqlExecutionResult result;
+    private final LibSqlExecutionResult result;
     private transient int cursor = 0;
     private transient boolean closed;
     private transient boolean wasNull;
     private transient Map<String, Integer> nameMap;
 
-    public LSqlResultSet(@NotNull LSqlStatement statement, @NotNull LSqlExecutionResult result) {
+    public LibSqlResultSet(@NotNull LibSqlStatement statement, @NotNull LibSqlExecutionResult result) {
         super(statement, null);
         this.result = result;
     }
 
     @NotNull
-    public LSqlExecutionResult getResult() {
+    public LibSqlExecutionResult getResult() {
         return result;
     }
 
-    private int getColumnIndex(String columnLabel) throws LSqlException {
+    private int getColumnIndex(String columnLabel) throws LibSqlException {
         if (nameMap == null) {
             nameMap = new HashMap<>();
             List<String> columns = result.getColumns();
@@ -58,18 +58,18 @@ public class LSqlResultSet extends AbstractJdbcResultSet<LSqlStatement, LSqlResu
         }
         Integer index = nameMap.get(columnLabel.toUpperCase(Locale.ENGLISH));
         if (index == null) {
-            throw new LSqlException("Column '" + columnLabel + "' is not present in result set");
+            throw new LibSqlException("Column '" + columnLabel + "' is not present in result set");
         }
         return index;
     }
 
-    private Object[] getCurrentRow() throws LSqlException {
+    private Object[] getCurrentRow() throws LibSqlException {
         List<Object[]> rows = result.getRows();
         if (cursor < 1) {
-            throw new LSqlException("Fetch not started");
+            throw new LibSqlException("Fetch not started");
         }
         if (cursor > rows.size()) {
-            throw new LSqlException("Fetch ended");
+            throw new LibSqlException("Fetch ended");
         }
         return rows.get(cursor - 1);
     }
@@ -265,9 +265,9 @@ public class LSqlResultSet extends AbstractJdbcResultSet<LSqlStatement, LSqlResu
     }
 
     @Override
-    public LSqlResultSetMetaData getMetaData() throws SQLException {
+    public LibSqlResultSetMetaData getMetaData() throws SQLException {
         if (metadata == null) {
-            metadata = new LSqlResultSetMetaData(this);
+            metadata = new LibSqlResultSetMetaData(this);
         }
         return metadata;
     }
@@ -276,7 +276,7 @@ public class LSqlResultSet extends AbstractJdbcResultSet<LSqlStatement, LSqlResu
     public Object getObject(int columnIndex) throws SQLException {
         Object[] currentRow = getCurrentRow();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
-            throw new LSqlException("Column index " + columnIndex + " is beyond range (1-" + currentRow.length + ")");
+            throw new LibSqlException("Column index " + columnIndex + " is beyond range (1-" + currentRow.length + ")");
         }
         Object value = currentRow[columnIndex - 1];
         wasNull = (value == null);
