@@ -39,12 +39,23 @@ public class LSqlDriverTest {
                         printResultSet(dbResult);
                     }
                 }
+                try (Statement dbStat = connection.createStatement()) {
+                    try (ResultSet dbResult = dbStat.executeQuery("select * from PRAGMA_TABLE_INFO('testme')")) {
+                        printResultSet(dbResult);
+                    }
+                }
 
                 System.out.println("Tables:");
                 try (ResultSet tables = metaData.getTables(null, null, null, null)) {
                     while (tables.next()) {
                         String tableName = tables.getString("TABLE_NAME");
                         System.out.println("\t- " + tableName);
+                        try (ResultSet columns = metaData.getColumns(null, null, tableName, null)) {
+                            while (columns.next()) {
+                                System.out.println("\t\t- " + columns.getString("COLUMN_NAME") + " " + columns.getString("TYPE_NAME"));
+                            }
+                        }
+
                     }
                 }
 
