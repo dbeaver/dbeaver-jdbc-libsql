@@ -23,10 +23,7 @@ import org.jkiss.utils.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
+import java.sql.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -116,4 +113,16 @@ public class LSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LSqlConne
         }
     }
 
+    @Override
+    public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
+        String tableName = tableNamePattern;
+        try (PreparedStatement dbStat = connection.prepareStatement(
+            "SELECT NULL as TABLE_CAT, NULL AS TABLE_SCHEM,'" + tableName + "' AS TABLE_NAME," +
+                "name as COLUMN_NAME," + Types.VARCHAR + " AS DATA_TYPE, type AS TYPE_NAME, 0 AS COLUMN_SIZE," +
+                "NULL AS REMARKS,cid AS ORDINAL_POSITION " +
+                "FROM PRAGMA_TABLE_INFO('" + tableName + "')")
+        ) {
+            return dbStat.executeQuery();
+        }
+    }
 }
