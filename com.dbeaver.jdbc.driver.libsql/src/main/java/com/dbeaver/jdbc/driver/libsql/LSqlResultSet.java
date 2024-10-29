@@ -43,11 +43,6 @@ public class LSqlResultSet extends AbstractJdbcResultSet<LSqlStatement, LSqlResu
         this.result = result;
     }
 
-    public LSqlResultSet(@NotNull LSqlExecutionResult result) {
-        super(null, null);
-        this.result = result;
-    }
-
     @NotNull
     public LSqlExecutionResult getResult() {
         return result;
