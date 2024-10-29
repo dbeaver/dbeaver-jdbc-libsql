@@ -26,12 +26,8 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class LSqlPreparedStatement extends LSqlStatement implements PreparedStatement {
-
-    protected Map<Object, Object> parameters = new LinkedHashMap<>();
 
     public LSqlPreparedStatement(
         @NotNull LSqlConnection connection, String sql) throws SQLException {

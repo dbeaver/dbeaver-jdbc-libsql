@@ -16,6 +16,9 @@
  */
 package com.dbeaver.jdbc.driver.libsql.client;
 
+import org.jkiss.utils.IOUtils;
+
+import java.io.IOException;
 import java.io.Reader;
 
 public class LSqlReaderInput {
@@ -25,5 +28,18 @@ public class LSqlReaderInput {
     public LSqlReaderInput(Reader stream, long length) {
         this.stream = stream;
         this.length = length;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            String str = IOUtils.readToString(stream);
+            if (length <= 0) {
+                return str;
+            }
+            return str.substring(0, (int) length);
+        } catch (IOException e) {
+            return e.getMessage();
+        }
     }
 }

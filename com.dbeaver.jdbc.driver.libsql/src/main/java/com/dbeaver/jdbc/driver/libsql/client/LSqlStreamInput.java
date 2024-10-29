@@ -16,7 +16,10 @@
  */
 package com.dbeaver.jdbc.driver.libsql.client;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class LSqlStreamInput {
     private InputStream stream;
@@ -26,4 +29,19 @@ public class LSqlStreamInput {
         this.stream = stream;
         this.length = length;
     }
+
+    @Override
+    public String toString() {
+        try {
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            for (int length; (length = stream.read(buffer)) != -1; ) {
+                result.write(buffer, 0, length);
+            }
+            return result.toString(StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return e.getMessage();
+        }
+    }
+
 }

@@ -16,6 +16,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * The entry point to LibSQL client API.
@@ -41,8 +43,8 @@ public class LSqlClient {
      *
      * @return The result set.
      */
-    public LSqlExecutionResult execute(String stmt) throws SQLException {
-        return batch(new String[]{stmt})[0];
+    public LSqlExecutionResult execute(String stmt, Map<Object, Object> parameters) throws SQLException {
+        return batch(new String[]{stmt}, new Map[]{ parameters })[0];
     }
 
     /**
@@ -51,14 +53,14 @@ public class LSqlClient {
      * @param stmts The SQL statements.
      * @return The result sets.
      */
-    public LSqlExecutionResult[] batch(String[] stmts) throws SQLException {
+    public LSqlExecutionResult[] batch(String[] stmts, Map<Object, Object>[] parameters) throws SQLException {
         try {
             HttpURLConnection conn = openConnection();
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
 
             try (OutputStream os = conn.getOutputStream()) {
-                query(stmts, os);
+                executeQuery(stmts, parameters, os);
             }
             try (InputStreamReader in = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8)) {
                 //String responseStr = IOUtils.readToString(in);
@@ -101,17 +103,71 @@ public class LSqlClient {
         }
     }
 
-    private void query(String[] stmts, OutputStream os) throws IOException {
+    private void executeQuery(String[] stmts, Map<Object, Object>[] parameters, OutputStream os) throws IOException {
         JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
         jsonWriter.beginObject();
         jsonWriter.name("statements");
         jsonWriter.beginArray();
-        for (String stmt : stmts) {
-            jsonWriter.value(stmt);
+        for (int i = 0; i < stmts.length; i++) {
+            String stmt = stmts[i];
+            if (i < parameters.length && !CommonUtils.isEmpty(parameters[i])) {
+                // Query with parameters
+                jsonWriter.beginObject();
+                jsonWriter.name("q");
+                jsonWriter.value(stmt);
+                jsonWriter.name("params");
+                if (isIndexedParams(parameters[i])) {
+                    Map<Integer, Object> paramTree = new TreeMap<>();
+                    for (Map.Entry<?,?> entry : parameters[i].entrySet()) {
+                        paramTree.put((Integer) entry.getKey(), entry.getValue());
+                    }
+                    jsonWriter.beginArray();
+                    for (Object value : paramTree.values()) {
+                        serializeParameterValue(value, jsonWriter);
+                    }
+                    jsonWriter.endArray();
+                } else {
+                    jsonWriter.beginObject();
+                    for (Map.Entry<?, ?> param : parameters[i].entrySet()) {
+                        jsonWriter.name(String.valueOf(param.getKey()));
+                        serializeParameterValue(param.getValue(), jsonWriter);
+                    }
+                    jsonWriter.endObject();
+                }
+
+                jsonWriter.endObject();
+            } else {
+                // Simple query
+                jsonWriter.value(stmt);
+            }
         }
         jsonWriter.endArray();
         jsonWriter.endObject();
         jsonWriter.flush();
+    }
+
+    private boolean isIndexedParams(Map<Object, Object> parameter) {
+        if (!parameter.isEmpty()) {
+            Object key1 = parameter.keySet().iterator().next();
+            if (key1 instanceof Integer) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void serializeParameterValue(Object value, JsonWriter jsonWriter) throws IOException {
+        if (value == null) {
+            jsonWriter.nullValue();
+        } else if (value instanceof Number nValue) {
+            jsonWriter.value(nValue);
+        } else if (value instanceof Boolean bValue) {
+            jsonWriter.value(bValue);
+        } else if (value instanceof String strValue) {
+            jsonWriter.value(strValue);
+        } else {
+            jsonWriter.value(value.toString());
+        }
     }
 
     private static class Response {
