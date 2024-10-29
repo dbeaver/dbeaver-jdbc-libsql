@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.Strictness;
 import com.google.gson.ToNumberPolicy;
 import com.google.gson.stream.JsonWriter;
+import org.jkiss.utils.CommonUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -60,14 +61,18 @@ public class LSqlClient {
                 query(stmts, os);
             }
             try (InputStreamReader in = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8)) {
+                //String responseStr = IOUtils.readToString(in);
                 Response[] response = gson.fromJson(in, Response[].class);
                 LSqlExecutionResult[] resultSets = new LSqlExecutionResult[response.length];
                 for (int i = 0; i < response.length; i++) {
+                    if (!CommonUtils.isEmpty(response[i].error)) {
+                        throw new SQLException(response[i].error);
+                    }
                     resultSets[i] = response[i].results;
                 }
                 return resultSets;
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new SQLException(e);
         }
 
@@ -110,6 +115,7 @@ public class LSqlClient {
     }
 
     private static class Response {
+        public String error;
         public LSqlExecutionResult results;
     }
 
