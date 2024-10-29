@@ -11,7 +11,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>com.dbeaver.jdbc.driver.libsql</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <name>DBeaver LibSQL JDBC Driver</name>
     <packaging>eclipse-plugin</packaging>
 
