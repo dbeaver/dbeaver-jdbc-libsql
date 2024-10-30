@@ -15,8 +15,8 @@ jobs:
     name: Check
     secrets: inherit
     with:
-      project-directory: ./dbeaver-jdbc-upd/aggregate
-      project-deps: ./dbeaver-jdbc-upd/project.deps
+      project-directory: ./dbeaver-jdbc-libsql
+      project-deps: ./dbeaver-jdbc-libsql/project.deps
       timeout-minutes: 2
 
   lint:
