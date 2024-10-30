@@ -17,7 +17,10 @@
 package com.dbeaver.jdbc.driver.libsql;
 
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,80 +48,7 @@ public class LibSqlDriver implements Driver {
             props.put(propName, info.get(propName));
         }
         return new LibSqlConnection(this, targetUrl, props);
-/*
-        UPDEndpoint endpoint = new UPDEndpoint();
-        endpoint.setServerAddress(matcher.group(1));
-        endpoint.setServerPort(CommonUtils.toInt(matcher.group(2), endpoint.getServerPort()));
-        endpoint.setProjectId(matcher.group(3));
-        String dsRef = matcher.group(4);
-        if (!dsRef.contains("=")) {
-            endpoint.setDataSourceId(dsRef);
-        } else {
-
-        }
-
-        Map<String, String> serverProperties = new LinkedHashMap<>();
-        Map<String, String> driverProperties = new LinkedHashMap<>();
-        for (Map.Entry<Object, Object> pe : info.entrySet()) {
-            String propName = pe.getKey().toString();
-            if (propName.startsWith(UPDConstants.DRIVER_PROPERTY_DBEAVER)) {
-                serverProperties.put(
-                    propName.substring(UPDConstants.DRIVER_PROPERTY_DBEAVER.length()),
-                    (String)pe.getValue());
-            } else {
-                driverProperties.put(propName, (String)pe.getValue());
-            }
-        }
-
-        UPDProtocol protocol = openServerConnection(endpoint, serverProperties);
-        try {
-            return new LSqlConnection(this, protocol, endpoint, serverProperties, driverProperties);
-        } catch (Throwable e) {
-            // Terminate remote client
-            protocol.close();
-            throw e;
-        }
-*/
     }
-
-/*
-    private UPDProtocol openServerConnection(
-        @NotNull UPDEndpoint endpoint,
-        @NotNull Map<String, String> serverProperties
-    ) throws SQLException {
-        StringBuilder url = new StringBuilder();
-        String schema = endpoint.getServerPort() == 0 ||
-            endpoint.getServerPort() == UPDConstants.DEFAULT_SERVER_PORT ? "https" : "http";
-        url.append(schema).append("://");
-        url.append(endpoint.getServerAddress());
-        if (endpoint.getServerPort() > 0) {
-            url.append(":").append(endpoint.getServerPort());
-        }
-        url.append("/api/upd/?");
-        if (endpoint.getProjectId() != null) {
-            url.append(UPDConstants.SERVER_URL_PARAM_PROJECT).append("=").append(endpoint.getProjectId());
-        } else {
-            throw new LSqlException("Datasource ID is missing");
-        }
-        if (endpoint.getDataSourceId() != null) {
-            url.append(UPDConstants.SERVER_URL_PARAM_DATASOURCE_ID).append("=").append(endpoint.getDataSourceId());
-        } else {
-            throw new LSqlException("Datasource ID is missing");
-        }
-
-        URI serverURI;
-        try {
-            serverURI = new URI(url.toString());
-        } catch (URISyntaxException e) {
-            throw new LSqlException("Invalid server URI [" + url + "]", e);
-        }
-
-        return JsonRpcClient
-            .builder(serverURI, UPDProtocol.class)
-            .setUserAgent(getDriverName() + " " + getFullVersion())
-            .create();
-    }
-*/
 
     @Override
     public boolean acceptsURL(String url) {
@@ -126,7 +56,7 @@ public class LibSqlDriver implements Driver {
     }
 
     @Override
-    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) {
         return new DriverPropertyInfo[] {
 
         };
@@ -148,7 +78,7 @@ public class LibSqlDriver implements Driver {
     }
 
     @Override
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+    public Logger getParentLogger() {
         return parentLogger;
     }
 

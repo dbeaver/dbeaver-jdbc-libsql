@@ -6,6 +6,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.Strictness;
 import com.google.gson.ToNumberPolicy;
 import com.google.gson.stream.JsonWriter;
+import org.jkiss.code.NotNull;
+import org.jkiss.code.Nullable;
 import org.jkiss.utils.CommonUtils;
 
 import java.io.IOException;
@@ -22,7 +24,7 @@ import java.util.TreeMap;
 /**
  * The entry point to LibSQL client API.
  */
-public class LSqlClient {
+public class LibSqlClient {
 
     private static final Gson gson = new GsonBuilder()
         .setStrictness(Strictness.LENIENT)
@@ -33,7 +35,7 @@ public class LSqlClient {
     private final URL url;
     private final String authToken;
 
-    public LSqlClient(URL url, String authToken) {
+    public LibSqlClient(URL url, String authToken) {
         this.url = url;
         this.authToken = authToken;
     }
@@ -44,16 +46,15 @@ public class LSqlClient {
      * @return The result set.
      */
     public LibSqlExecutionResult execute(String stmt, Map<Object, Object> parameters) throws SQLException {
-        return batch(new String[]{stmt}, new Map[]{ parameters })[0];
+        return executeBatch(new String[]{stmt}, new Map[]{ parameters })[0];
     }
 
     /**
      * Execute a batch of SQL statements.
-     *
-     * @param stmts The SQL statements.
-     * @return The result sets.
      */
-    public LibSqlExecutionResult[] batch(String[] stmts, Map<Object, Object>[] parameters) throws SQLException {
+    public LibSqlExecutionResult[] executeBatch(
+        @NotNull String[] stmts,
+        @Nullable Map<Object, Object>[] parameters) throws SQLException {
         try {
             HttpURLConnection conn = openConnection();
             conn.setRequestMethod("POST");
@@ -103,13 +104,17 @@ public class LSqlClient {
         }
     }
 
-    private void executeQuery(String[] stmts, Map<Object, Object>[] parameters, OutputStream os) throws IOException {
+    private void executeQuery(
+        @NotNull String[] queries,
+        @Nullable Map<Object, Object>[] parameters,
+        @NotNull OutputStream os
+    ) throws IOException {
         JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
         jsonWriter.beginObject();
         jsonWriter.name("statements");
         jsonWriter.beginArray();
-        for (int i = 0; i < stmts.length; i++) {
-            String stmt = stmts[i];
+        for (int i = 0; i < queries.length; i++) {
+            String stmt = queries[i];
             if (i < parameters.length && !CommonUtils.isEmpty(parameters[i])) {
                 // Query with parameters
                 jsonWriter.beginObject();

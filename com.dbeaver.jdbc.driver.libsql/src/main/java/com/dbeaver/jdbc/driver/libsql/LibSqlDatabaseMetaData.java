@@ -18,18 +18,23 @@ package com.dbeaver.jdbc.driver.libsql;
 
 import com.dbeaver.jdbc.model.AbstractJdbcDatabaseMetaData;
 import org.jkiss.code.NotNull;
+import org.jkiss.utils.CommonUtils;
 import org.jkiss.utils.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlConnection> {
 
-    private static Pattern VERSION_PATTERN = Pattern.compile("(\\w+)\\s+([0-9.]+)\\s+(.+)");
+    private static final Pattern VERSION_PATTERN = Pattern.compile("(\\w+)\\s+([0-9.]+)\\s+(.+)");
+
     private String serverVersion;
 
     public LibSqlDatabaseMetaData(@NotNull LibSqlConnection connection) {
@@ -67,12 +72,12 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
     }
 
     @Override
-    public String getDriverName() throws SQLException {
+    public String getDriverName() {
         return connection.getDriver().getDriverName();
     }
 
     @Override
-    public String getDriverVersion() throws SQLException {
+    public String getDriverVersion() {
         return connection.getDriver().getFullVersion();
     }
 
@@ -87,22 +92,8 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
     }
 
     @Override
-    public ResultSet getCatalogs() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public ResultSet getSchemas() throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
-    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
-    @Override
     public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
+        verifySchemaParameters(catalog, schemaPattern);
         try (PreparedStatement dbStat = connection.prepareStatement(
             "SELECT NULL as TABLE_CAT, NULL AS TABLE_SCHEM," +
                 "name AS TABLE_NAME,type as TABLE_TYPE, " +
@@ -115,6 +106,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
 
     @Override
     public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
+        verifySchemaParameters(catalog, schemaPattern);
         String tableName = tableNamePattern;
         try (PreparedStatement dbStat = connection.prepareStatement(
             "SELECT NULL as TABLE_CAT, NULL AS TABLE_SCHEM,'" + tableName + "' AS TABLE_NAME," +
@@ -125,4 +117,15 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
             return dbStat.executeQuery();
         }
     }
+
+    private static void verifySchemaParameters(String catalog, String schemaPattern) throws SQLException {
+        if (!CommonUtils.isEmpty(catalog)) {
+            throw new SQLException("Catalogs are not supported");
+        }
+        if (!CommonUtils.isEmpty(schemaPattern)) {
+            throw new SQLException("Schemas are not supported");
+        }
+    }
+
+
 }

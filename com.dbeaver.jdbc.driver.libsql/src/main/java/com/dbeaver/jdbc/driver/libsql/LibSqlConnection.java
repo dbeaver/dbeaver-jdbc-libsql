@@ -16,7 +16,7 @@
  */
 package com.dbeaver.jdbc.driver.libsql;
 
-import com.dbeaver.jdbc.driver.libsql.client.LSqlClient;
+import com.dbeaver.jdbc.driver.libsql.client.LibSqlClient;
 import com.dbeaver.jdbc.model.AbstractJdbcConnection;
 import org.jkiss.code.NotNull;
 import org.jkiss.utils.CommonUtils;
@@ -33,11 +33,13 @@ public class LibSqlConnection extends AbstractJdbcConnection {
 
     @NotNull
     private final LibSqlDriver driver;
-    private final LSqlClient client;
     @NotNull
-    private String url;
+    private final LibSqlClient client;
     @NotNull
-    private Map<String, Object> driverProperties;
+    private final String url;
+    @NotNull
+    private final Map<String, Object> driverProperties;
+    private LibSqlDatabaseMetaData databaseMetaData;
 
     public LibSqlConnection(
         @NotNull LibSqlDriver driver,
@@ -50,7 +52,7 @@ public class LibSqlConnection extends AbstractJdbcConnection {
 
         try {
             String token = CommonUtils.toString(driverProperties.get("password"));
-            this.client = new LSqlClient(new URL(url), token);
+            this.client = new LibSqlClient(new URL(url), token);
         } catch (IOException e) {
             throw new SQLException(e);
         }
@@ -58,7 +60,7 @@ public class LibSqlConnection extends AbstractJdbcConnection {
         getMetaData().getDatabaseProductName();
     }
 
-    public LSqlClient getClient() {
+    public LibSqlClient getClient() {
         return client;
     }
 
@@ -103,7 +105,10 @@ public class LibSqlConnection extends AbstractJdbcConnection {
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        return new LibSqlDatabaseMetaData(this);
+        if (databaseMetaData == null) {
+            databaseMetaData = new LibSqlDatabaseMetaData(this);
+        }
+        return databaseMetaData;
     }
 
 }
