@@ -54,6 +54,8 @@ public class LibSqlConnection extends AbstractJdbcConnection {
         } catch (IOException e) {
             throw new SQLException(e);
         }
+        // Verify connection
+        getMetaData().getDatabaseProductName();
     }
 
     public LSqlClient getClient() {
