@@ -44,7 +44,7 @@ public class LibSqlDriver implements Driver {
 
         Map<String, Object> props = new LinkedHashMap<>();
         for (Enumeration<?> pne = info.propertyNames(); pne.hasMoreElements(); ) {
-            String propName = pne.toString();
+            String propName = (String) pne.nextElement();
             props.put(propName, info.get(propName));
         }
         return new LibSqlConnection(this, targetUrl, props);

@@ -74,6 +74,14 @@ public class LibSqlClient {
                     resultSets[i] = response[i].results;
                 }
                 return resultSets;
+            } catch (IOException e) {
+                switch (conn.getResponseCode()) {
+                    case HttpURLConnection.HTTP_UNAUTHORIZED ->
+                        throw new SQLException("Authentication required", e);
+                    case HttpURLConnection.HTTP_FORBIDDEN ->
+                        throw new SQLException("Access denied", e);
+                }
+                throw e;
             }
         } catch (IOException e) {
             throw new SQLException(e);

@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.dbeaver.jdbc.driver.libsql
 Bundle-Version: 1.0.1.qualifier
 Bundle-Release-Date: 20230522
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Export-Package: com.dbeaver.jdbc.libsql
+Export-Package: com.dbeaver.jdbc.driver.libsql,
+ com.dbeaver.jdbc.driver.libsql.client
 Require-Bundle: com.dbeaver.jdbc.api,
  com.dbeaver.rpc,
  org.jkiss.utils,
