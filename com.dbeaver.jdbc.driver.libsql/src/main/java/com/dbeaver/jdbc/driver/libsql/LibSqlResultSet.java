@@ -96,77 +96,84 @@ public class LibSqlResultSet extends AbstractJdbcResultSet<LibSqlStatement, LibS
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
-        return false;
+        return CommonUtils.toBoolean(getObject(columnIndex));
     }
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
-        return 0;
+        return (byte) CommonUtils.toInt(getObject(columnIndex));
     }
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
-        return 0;
+        return (short) CommonUtils.toInt(getObject(columnIndex));
     }
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        return 0;
+        return CommonUtils.toInt(getObject(columnIndex));
     }
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
-        return 0;
+        return CommonUtils.toLong(getObject(columnIndex));
     }
 
     @Override
     public float getFloat(int columnIndex) throws SQLException {
-        return 0;
+        return CommonUtils.toFloat(getObject(columnIndex));
     }
 
     @Override
     public double getDouble(int columnIndex) throws SQLException {
-        return 0;
+        return CommonUtils.toDouble(getObject(columnIndex));
     }
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
-        return null;
+        Object object = getObject(columnIndex);
+        return object == null ? null :
+            object instanceof BigDecimal bd ? bd :
+                object instanceof Long str ? BigDecimal.valueOf(str) : BigDecimal.valueOf(CommonUtils.toDouble(object));
     }
 
     @Override
     public byte[] getBytes(int columnIndex) throws SQLException {
-        return new byte[0];
+        Object object = getObject(columnIndex);
+        return object == null ? null : object.toString().getBytes();
     }
 
     @Override
     public Date getDate(int columnIndex) throws SQLException {
-        return null;
+        Object object = getObject(columnIndex);
+        return object == null ? null : Date.valueOf(object.toString());
     }
 
     @Override
     public Time getTime(int columnIndex) throws SQLException {
-        return null;
+        Object object = getObject(columnIndex);
+        return object == null ? null : Time.valueOf(object.toString());
     }
 
     @Override
     public Timestamp getTimestamp(int columnIndex) throws SQLException {
-        return null;
+        Object object = getObject(columnIndex);
+        return object == null ? null : Timestamp.valueOf(object.toString());
     }
 
     @Override
     public InputStream getAsciiStream(int columnIndex) throws SQLException {
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public InputStream getUnicodeStream(int columnIndex) throws SQLException {
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public InputStream getBinaryStream(int columnIndex) throws SQLException {
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -176,77 +183,84 @@ public class LibSqlResultSet extends AbstractJdbcResultSet<LibSqlStatement, LibS
 
     @Override
     public boolean getBoolean(String columnLabel) throws SQLException {
-        return false;
+        return CommonUtils.toBoolean(getObject(columnLabel));
     }
 
     @Override
     public byte getByte(String columnLabel) throws SQLException {
-        return 0;
+        return (byte) CommonUtils.toInt(getObject(columnLabel));
     }
 
     @Override
     public short getShort(String columnLabel) throws SQLException {
-        return 0;
+        return (short) CommonUtils.toInt(getObject(columnLabel));
     }
 
     @Override
     public int getInt(String columnLabel) throws SQLException {
-        return 0;
+        return CommonUtils.toInt(getObject(columnLabel));
     }
 
     @Override
     public long getLong(String columnLabel) throws SQLException {
-        return 0;
+        return CommonUtils.toLong(getObject(columnLabel));
     }
 
     @Override
     public float getFloat(String columnLabel) throws SQLException {
-        return 0;
+        return CommonUtils.toFloat(getObject(columnLabel));
     }
 
     @Override
     public double getDouble(String columnLabel) throws SQLException {
-        return 0;
+        return CommonUtils.toDouble(getObject(columnLabel));
     }
 
     @Override
     public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
-        return null;
+        Object object = getObject(columnLabel);
+        return object == null ? null :
+            object instanceof BigDecimal bd ? bd :
+                object instanceof Long str ? BigDecimal.valueOf(str) : BigDecimal.valueOf(CommonUtils.toDouble(object));
     }
 
     @Override
     public byte[] getBytes(String columnLabel) throws SQLException {
-        return new byte[0];
+        Object object = getObject(columnLabel);
+        return object == null ? null : object.toString().getBytes();
     }
 
     @Override
     public Date getDate(String columnLabel) throws SQLException {
-        return null;
+        Object object = getObject(columnLabel);
+        return object == null ? null : Date.valueOf(object.toString());
     }
 
     @Override
     public Time getTime(String columnLabel) throws SQLException {
-        return null;
+        Object object = getObject(columnLabel);
+        return object == null ? null : Time.valueOf(object.toString());
     }
 
     @Override
     public Timestamp getTimestamp(String columnLabel) throws SQLException {
-        return null;
+        Object object = getObject(columnLabel);
+        return object == null ? null : Timestamp.valueOf(object.toString());
     }
 
     @Override
     public InputStream getAsciiStream(String columnLabel) throws SQLException {
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public InputStream getUnicodeStream(String columnLabel) throws SQLException {
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public InputStream getBinaryStream(String columnLabel) throws SQLException {
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
