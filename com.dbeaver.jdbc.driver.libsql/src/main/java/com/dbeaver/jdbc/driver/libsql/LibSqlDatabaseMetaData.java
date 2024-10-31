@@ -25,12 +25,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Queries related to keys and indexes were taken from Xerial SQLite driver (https://github.com/xerial/sqlite-jdbc)
+ */
 public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlConnection> {
 
     private static final Pattern VERSION_PATTERN = Pattern.compile("(\\w+)\\s+([0-9.]+)\\s+(.+)");
@@ -124,7 +125,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
 
         StringBuilder sql = new StringBuilder();
         sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '")
-            .append(escape(table))
+            .append(LibSqlUtils.escape(table))
             .append("' as TABLE_NAME, cn as COLUMN_NAME, ks as KEY_SEQ, pk as PK_NAME from (");
 
         if (columns == null) {
@@ -142,7 +143,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
             sql.append("select ")
                 .append(pkName)
                 .append(" as pk, '")
-                .append(escape(unquoteIdentifier(columns[i])))
+                .append(LibSqlUtils.escape(LibSqlUtils.unquote(columns[i])))
                 .append("' as cn, ")
                 .append(i + 1)
                 .append(" as ks");
@@ -169,14 +170,14 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
             // define the column header
             // this is from the JDBC spec, it is part of the driver protocol
             sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '")
-                .append(escape(table))
+                .append(LibSqlUtils.escape(table))
                 .append("' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
                 .append(Integer.toString(DatabaseMetaData.tableIndexOther)).append(" as TYPE, op as ORDINAL_POSITION, ")
                 .append("cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
 
             // this always returns a result set now, previously threw exception
             List<IndexInfo> indexList = new ArrayList<>();
-            try (ResultSet rs = executeQuery("pragma index_list('" + escape(table) + "')")) {
+            try (ResultSet rs = executeQuery("pragma index_list('" + LibSqlUtils.escape(table) + "')")) {
                 while (rs.next()) {
                     IndexInfo indexInfo = new IndexInfo(
                         rs.getString(2),
@@ -194,19 +195,19 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
                 List<String> unionAll = new ArrayList<>();
                 for (IndexInfo currentIndex : indexList) {
                     String indexName = currentIndex.indexName;
-                    try (ResultSet rs = executeQuery("pragma index_info('" + escape(indexName) + "')")) {
+                    try (ResultSet rs = executeQuery("pragma index_info('" + LibSqlUtils.escape(indexName) + "')")) {
                         while (rs.next()) {
                             StringBuilder sqlRow = new StringBuilder();
 
                             String colName = rs.getString(3);
                             sqlRow.append("select ")
                                 .append(1 - currentIndex.indexId).append(" as un,'")
-                                .append(escape(indexName)).append("' as n,")
+                                .append(LibSqlUtils.escape(indexName)).append("' as n,")
                                 .append(rs.getInt(1) + 1).append(" as op,");
                             if (colName == null) { // expression index
                                 sqlRow.append("null");
                             } else {
-                                sqlRow.append("'").append(escape(colName)).append("'");
+                                sqlRow.append("'").append(LibSqlUtils.escape(colName)).append("'");
                             }
                             sqlRow.append(" as cn");
 
@@ -228,18 +229,18 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
             StringBuilder sql = new StringBuilder();
 
             sql.append("select ")
-                .append(quote(catalog)).append(" as PKTABLE_CAT, ")
-                .append(quote(schema)).append(" as PKTABLE_SCHEM, ")
+                .append(LibSqlUtils.quote(catalog)).append(" as PKTABLE_CAT, ")
+                .append(LibSqlUtils.quote(schema)).append(" as PKTABLE_SCHEM, ")
                 .append("ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, ")
-                .append(quote(catalog)).append(" as FKTABLE_CAT, ")
-                .append(quote(schema)).append(" as FKTABLE_SCHEM, ")
-                .append(quote(table)).append(" as FKTABLE_NAME, ")
+                .append(LibSqlUtils.quote(catalog)).append(" as FKTABLE_CAT, ")
+                .append(LibSqlUtils.quote(schema)).append(" as FKTABLE_SCHEM, ")
+                .append(LibSqlUtils.quote(table)).append(" as FKTABLE_NAME, ")
                 .append("fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, fkn as FK_NAME, pkn as PK_NAME, ")
                 .append(DatabaseMetaData.importedKeyInitiallyDeferred)
                 .append(" as DEFERRABILITY from (");
 
             // Use a try catch block to avoid "query does not return ResultSet" error
-            try (ResultSet rs = executeQuery("pragma foreign_key_list('" + escape(table) + "')")) {
+            try (ResultSet rs = executeQuery("pragma foreign_key_list('" + LibSqlUtils.escape(table) + "')")) {
 
                 final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(connection, table);
                 List<ImportedKeyFinder.ForeignKey> fkNames = impFkFinder.getFkList();
@@ -275,11 +276,11 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
                     sql.append("select ")
                         .append(keySeq).append(" as ks,")
                         .append("'")
-                        .append(escape(PKTabName)).append("' as ptn, '")
-                        .append(escape(FKColName)).append("' as fcn, '")
-                        .append(escape(PKColName)).append("' as pcn,")
+                        .append(LibSqlUtils.escape(PKTabName)).append("' as ptn, '")
+                        .append(LibSqlUtils.escape(FKColName)).append("' as fcn, '")
+                        .append(LibSqlUtils.escape(PKColName)).append("' as pcn,")
                         .append("case '")
-                        .append(escape(updateRule))
+                        .append(LibSqlUtils.escape(updateRule))
                         .append("'")
                         .append(" when 'NO ACTION' then ").append(DatabaseMetaData.importedKeyNoAction)
                         .append(" when 'CASCADE' then ").append(DatabaseMetaData.importedKeyCascade)
@@ -288,7 +289,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
                         .append(" when 'SET DEFAULT' then ").append(DatabaseMetaData.importedKeySetDefault)
                         .append(" end as ur, ")
                         .append("case '")
-                        .append(escape(deleteRule))
+                        .append(LibSqlUtils.escape(deleteRule))
                         .append("'")
                         .append(" when 'NO ACTION' then ").append(DatabaseMetaData.importedKeyNoAction)
                         .append(" when 'CASCADE' then ").append(DatabaseMetaData.importedKeyCascade)
@@ -296,8 +297,8 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
                         .append(" when 'SET NULL' then ").append(DatabaseMetaData.importedKeySetNull)
                         .append(" when 'SET DEFAULT' then ").append(DatabaseMetaData.importedKeySetDefault)
                         .append(" end as dr, ")
-                        .append(fkName == null ? "''" : quote(fkName)).append(" as fkn, ")
-                        .append(pkName == null ? "''" : quote(pkName)).append(" as pkn");
+                        .append(fkName == null ? "''" : LibSqlUtils.quote(fkName)).append(" as fkn, ")
+                        .append(pkName == null ? "''" : LibSqlUtils.quote(pkName)).append(" as pkn");
                 }
                 if (i == 0) {
                     sql.append("select -1 as ks, '' as ptn, '' as fcn, '' as pcn, ")
@@ -314,9 +315,125 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
         }
     }
 
+    private static final Map<String, Integer> RULE_MAP = new HashMap<>();
+
+    static {
+        RULE_MAP.put("NO ACTION", DatabaseMetaData.importedKeyNoAction);
+        RULE_MAP.put("CASCADE", DatabaseMetaData.importedKeyCascade);
+        RULE_MAP.put("RESTRICT", DatabaseMetaData.importedKeyRestrict);
+        RULE_MAP.put("SET NULL", DatabaseMetaData.importedKeySetNull);
+        RULE_MAP.put("SET DEFAULT", DatabaseMetaData.importedKeySetDefault);
+    }
+
     @Override
     public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
-        return super.getExportedKeys(catalog, schema, table);
+        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(connection, table);
+        String[] pkColumns = pkFinder.getColumns();
+
+        catalog = (catalog != null) ? LibSqlUtils.quote(catalog) : null;
+        schema = (schema != null) ? LibSqlUtils.quote(schema) : null;
+
+        StringBuilder exportedKeysQuery = new StringBuilder();
+
+        String target = null;
+        int count = 0;
+        if (pkColumns != null) {
+            // retrieve table list
+            ArrayList<String> tableList;
+            try (ResultSet rs = executeQuery("select name from sqlite_schema where type = 'table'")) {
+                tableList = new ArrayList<>();
+
+                while (rs.next()) {
+                    String tblname = rs.getString(1);
+                    tableList.add(tblname);
+                    if (tblname.equalsIgnoreCase(table)) {
+                        // get the correct case as in the database
+                        // (not uppercase nor lowercase)
+                        target = tblname;
+                    }
+                }
+            }
+
+            // find imported keys for each table
+            for (String tbl : tableList) {
+                final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(connection, tbl);
+                List<ImportedKeyFinder.ForeignKey> fkNames = impFkFinder.getFkList();
+
+                for (ImportedKeyFinder.ForeignKey foreignKey : fkNames) {
+                    String PKTabName = foreignKey.pkTableName;
+
+                    if (PKTabName == null || !PKTabName.equalsIgnoreCase(target)) {
+                        continue;
+                    }
+
+                    for (int j = 0; j < foreignKey.fkColNames.size(); j++) {
+                        int keySeq = j + 1;
+                        String pkColName = foreignKey.pkColNames.get(j);
+                        pkColName = (pkColName == null) ? "" : pkColName;
+                        String fkColName = foreignKey.fkColNames.get(j);
+                        fkColName = (fkColName == null) ? "" : fkColName;
+
+                        boolean usePkName = false;
+                        for (String pkColumn : pkColumns) {
+                            if (pkColumn != null && pkColumn.equalsIgnoreCase(pkColName)) {
+                                usePkName = true;
+                                break;
+                            }
+                        }
+                        String pkName =
+                            (usePkName && pkFinder.getName() != null) ? pkFinder.getName() : "";
+
+                        exportedKeysQuery
+                            .append(count > 0 ? " union all select " : "select ")
+                            .append(keySeq).append(" as ks, '")
+                            .append(LibSqlUtils.escape(tbl)).append("' as fkt, '")
+                            .append(LibSqlUtils.escape(fkColName)).append("' as fcn, '")
+                            .append(LibSqlUtils.escape(pkColName)).append("' as pcn, '")
+                            .append(LibSqlUtils.escape(pkName)).append("' as pkn, ")
+                            .append(RULE_MAP.get(foreignKey.onUpdate)).append(" as ur, ")
+                            .append(RULE_MAP.get(foreignKey.onDelete)).append(" as dr, ");
+
+                        String fkName = foreignKey.getFkName();
+
+                        if (fkName != null) {
+                            exportedKeysQuery.append("'").append(LibSqlUtils.escape(fkName)).append("' as fkn");
+                        } else {
+                            exportedKeysQuery.append("'' as fkn");
+                        }
+
+                        count++;
+                    }
+                }
+            }
+        }
+
+        boolean hasImportedKey = (count > 0);
+        StringBuilder sql = new StringBuilder(512);
+        sql.append("select ")
+            .append(catalog).append(" as PKTABLE_CAT, ")
+            .append(schema).append(" as PKTABLE_SCHEM, ")
+            .append(LibSqlUtils.quote(target)).append(" as PKTABLE_NAME, ")
+            .append(hasImportedKey ? "pcn" : "''").append(" as PKCOLUMN_NAME, ")
+            .append(catalog).append(" as FKTABLE_CAT, ")
+            .append(schema).append(" as FKTABLE_SCHEM, ")
+            .append(hasImportedKey ? "fkt" : "''").append(" as FKTABLE_NAME, ")
+            .append(hasImportedKey ? "fcn" : "''").append(" as FKCOLUMN_NAME, ")
+            .append(hasImportedKey ? "ks" : "-1").append(" as KEY_SEQ, ")
+            .append(hasImportedKey ? "ur" : "3").append(" as UPDATE_RULE, ")
+            .append(hasImportedKey ? "dr" : "3").append(" as DELETE_RULE, ")
+            .append(hasImportedKey ? "fkn" : "''").append(" as FK_NAME, ")
+            .append(hasImportedKey ? "pkn" : "''").append(" as PK_NAME, ")
+            .append(DatabaseMetaData.importedKeyInitiallyDeferred).append(" as DEFERRABILITY ");
+
+        if (hasImportedKey) {
+            sql.append("from (")
+                .append(exportedKeysQuery)
+                .append(") ORDER BY FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ");
+        } else {
+            sql.append("limit 0");
+        }
+
+        return executeQuery(sql.toString());
     }
 
     @Override
@@ -329,13 +446,13 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
         }
 
         String query =
-            "select " + quote(parentCatalog)
-            + " as PKTABLE_CAT, " + quote(parentSchema)
-            + " as PKTABLE_SCHEM, " + quote(parentTable)
+            "select " + LibSqlUtils.quote(parentCatalog)
+            + " as PKTABLE_CAT, " + LibSqlUtils.quote(parentSchema)
+            + " as PKTABLE_SCHEM, " + LibSqlUtils.quote(parentTable)
             + " as PKTABLE_NAME, "
-            + "'' as PKCOLUMN_NAME, " + quote(foreignCatalog)
-            + " as FKTABLE_CAT, " + quote(foreignSchema)
-            + " as FKTABLE_SCHEM, " + quote(foreignTable)
+            + "'' as PKCOLUMN_NAME, " + LibSqlUtils.quote(foreignCatalog)
+            + " as FKTABLE_CAT, " + LibSqlUtils.quote(foreignSchema)
+            + " as FKTABLE_SCHEM, " + LibSqlUtils.quote(foreignTable)
             + " as FKTABLE_NAME, "
             + "'' as FKCOLUMN_NAME, -1 as KEY_SEQ, 3 as UPDATE_RULE, 3 as DELETE_RULE, '' as FK_NAME, '' as PK_NAME, "
             + DatabaseMetaData.importedKeyInitiallyDeferred + " as DEFERRABILITY limit 0 ";
@@ -351,54 +468,8 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
         }
     }
 
-    public static String quote(String identifier) {
-        return "'" + identifier + "'";
-    }
-
-    /**
-     * Follow rules in <a href="https://www.sqlite.org/lang_keywords.html">SQLite Keywords</a>
-     *
-     * @param name Identifier name
-     * @return Unquoted identifier
-     */
-    public static String unquoteIdentifier(String name) {
-        if (name == null) return name;
-        name = name.trim();
-        if (name.length() > 2
-            && ((name.startsWith("`") && name.endsWith("`"))
-                || (name.startsWith("\"") && name.endsWith("\""))
-                || (name.startsWith("[") && name.endsWith("]")))) {
-            // unquote to be consistent with column names returned by getColumns()
-            name = name.substring(1, name.length() - 1);
-        }
-        return name;
-    }
-
-    public static String escape(final String val) {
-        if (val.indexOf('\'') == 1) {
-            return val;
-        }
-        int len = val.length();
-        StringBuilder buf = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            if (val.charAt(i) == '\'') {
-                buf.append('\'');
-            }
-            buf.append(val.charAt(i));
-        }
-        return buf.toString();
-    }
-
     private ResultSet executeQuery(String query) throws SQLException {
-        try (Statement stat = connection.createStatement()) {
-            return stat.executeQuery(query);
-        }
-    }
-
-    public static ResultSet executeQuery(Connection connection, String query) throws SQLException {
-        try (Statement stat = connection.createStatement()) {
-            return stat.executeQuery(query);
-        }
+        return LibSqlUtils.executeQuery(connection, query);
     }
 
     /**
@@ -433,12 +504,12 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
                 throw new SQLException("Invalid table name: '" + this.table + "'");
             }
 
-            try (ResultSet rs = executeQuery(
+            try (ResultSet rs = LibSqlUtils.executeQuery(
                 connection,
-                 "select sql from sqlite_schema where"
-                 + " lower(name) = lower('"
-                 + escape(table)
-                 + "') and type in ('table', 'view')")) {
+                "select sql from sqlite_schema where"
+                + " lower(name) = lower('"
+                + LibSqlUtils.escape(table)
+                + "') and type in ('table', 'view')")) {
 
                 if (!rs.next()) {
                     throw new SQLException("Table not found: '" + table + "'");
@@ -446,7 +517,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
 
                 Matcher matcher = PK_NAMED_PATTERN.matcher(rs.getString(1));
                 if (matcher.find()) {
-                    pkName = unquoteIdentifier(escape(matcher.group(1)));
+                    pkName = LibSqlUtils.unquote(LibSqlUtils.escape(matcher.group(1)));
                     pkColumns = matcher.group(2).split(",");
                 } else {
                     matcher = PK_UNNAMED_PATTERN.matcher(rs.getString(1));
@@ -456,7 +527,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
                 }
 
                 if (pkColumns == null) {
-                    try (ResultSet rs2 = executeQuery(connection, "pragma table_info('" + escape(table) + "')")) {
+                    try (ResultSet rs2 = LibSqlUtils.executeQuery(connection, "pragma table_info('" + LibSqlUtils.escape(table) + "')")) {
                         while (rs2.next()) {
                             if (rs2.getBoolean(6)) pkColumns = new String[] {rs2.getString(2)};
                         }
@@ -465,7 +536,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
 
                 if (pkColumns != null) {
                     for (int i = 0; i < pkColumns.length; i++) {
-                        pkColumns[i] = unquoteIdentifier(pkColumns[i]);
+                        pkColumns[i] = LibSqlUtils.unquote(pkColumns[i]);
                     }
                 }
             }
@@ -488,7 +559,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
     static class ImportedKeyFinder {
 
         /** Pattern used to extract a named primary key. */
-        private final Pattern FK_NAMED_PATTERN =
+        private static final Pattern FK_NAMED_PATTERN =
             Pattern.compile(
                 "CONSTRAINT\\s*\"?([A-Za-z_][A-Za-z\\d_]*)?\"?\\s*FOREIGN\\s+KEY\\s*\\((.*?)\\)",
                 Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -504,10 +575,10 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
 
             List<String> fkNames = getForeignKeyNames(table);
 
-            try (ResultSet rs = executeQuery(connection,
-                         "pragma foreign_key_list('"
-                         + escape(table.toLowerCase())
-                         + "')")) {
+            try (ResultSet rs = LibSqlUtils.executeQuery(connection,
+                "pragma foreign_key_list('"
+                + LibSqlUtils.escape(table.toLowerCase())
+                + "')")) {
 
                 int prevFkId = -1;
                 int count = 0;
@@ -549,11 +620,11 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
             if (tbl == null) {
                 return fkNames;
             }
-            try (ResultSet rs = executeQuery(conn,
-                         "select sql from sqlite_schema where"
-                         + " lower(name) = lower('"
-                         + escape(tbl)
-                         + "')")) {
+            try (ResultSet rs = LibSqlUtils.executeQuery(conn,
+                "select sql from sqlite_schema where"
+                + " lower(name) = lower('"
+                + LibSqlUtils.escape(tbl)
+                + "')")) {
 
                 if (rs.next()) {
                     Matcher matcher = FK_NAMED_PATTERN.matcher(rs.getString(1));
