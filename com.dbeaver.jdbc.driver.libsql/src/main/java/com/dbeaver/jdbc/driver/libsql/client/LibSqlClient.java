@@ -36,6 +36,7 @@ public class LibSqlClient {
 
     private final URL url;
     private final String authToken;
+    private String userAgent = LibSqlConstants.DRIVER_INFO + " " + LibSqlConstants.DRIVER_VERSION_MAJOR + "." + LibSqlConstants.DRIVER_VERSION_MAJOR;
     private final HttpClient client;
 
     public LibSqlClient(URL url, String authToken) {
@@ -46,6 +47,10 @@ public class LibSqlClient {
             .executor(Executors.newSingleThreadExecutor())
             .cookieHandler(new CookieManager());
         this.client = builder.build();
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
     /**
@@ -71,8 +76,7 @@ public class LibSqlClient {
                 .uri(url.toURI())
                 .version(HttpClient.Version.HTTP_1_1)
                 //.header("Content-Type", "application/json")
-                .header("User-Agent",
-                    LibSqlConstants.DRIVER_INFO + " " + LibSqlConstants.DRIVER_VERSION_MAJOR + "." + LibSqlConstants.DRIVER_VERSION_MAJOR)
+                .header("User-Agent", userAgent)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBuffer.toString()));
             if (authToken != null) {
                 builder.header("Authorization", "Bearer " + authToken);
@@ -143,7 +147,7 @@ public class LibSqlClient {
         jsonWriter.beginArray();
         for (int i = 0; i < queries.length; i++) {
             String stmt = queries[i];
-            if (i < parameters.length && !CommonUtils.isEmpty(parameters[i])) {
+            if (parameters != null && i < parameters.length && !CommonUtils.isEmpty(parameters[i])) {
                 // Query with parameters
                 jsonWriter.beginObject();
                 jsonWriter.name("q");
@@ -181,10 +185,7 @@ public class LibSqlClient {
 
     private boolean isIndexedParams(Map<Object, Object> parameter) {
         if (!parameter.isEmpty()) {
-            Object key1 = parameter.keySet().iterator().next();
-            if (key1 instanceof Integer) {
-                return true;
-            }
+            return parameter.keySet().iterator().next() instanceof Integer;
         }
         return false;
     }
