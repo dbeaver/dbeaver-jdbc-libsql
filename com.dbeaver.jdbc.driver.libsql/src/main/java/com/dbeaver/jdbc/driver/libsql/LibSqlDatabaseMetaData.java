@@ -108,18 +108,22 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
     @Override
     public ResultSet getColumns(String catalog, String schemaPattern, String tableName, String columnNamePattern) throws SQLException {
         verifySchemaParameters(catalog, schemaPattern);
-        try (PreparedStatement dbStat = connection.prepareStatement(
-            "SELECT NULL as TABLE_CAT, NULL AS TABLE_SCHEM,'" + tableName + "' AS TABLE_NAME," +
-                "name as COLUMN_NAME," + Types.VARCHAR + " AS DATA_TYPE, type AS TYPE_NAME, 0 AS COLUMN_SIZE," +
-                "NULL AS REMARKS,cid AS ORDINAL_POSITION " +
-                "FROM PRAGMA_TABLE_INFO('" + tableName + "')")
-        ) {
-            return dbStat.executeQuery();
+        if (CommonUtils.isEmpty(tableName) || "%".equals(tableName)) {
+            tableName = null;
         }
+        return executeQuery(
+            "WITH all_tables AS (SELECT name AS tn FROM sqlite_master WHERE type = 'table'" +
+                (tableName == null ? "" : " and name=" + LibSqlUtils.escape(tableName)) + ") \n" +
+                "SELECT NULL as TABLE_CAT, NULL AS TABLE_SCHEM, at.tn as TABLE_NAME,\n" +
+                "pti.name as COLUMN_NAME," + Types.VARCHAR + " AS DATA_TYPE, pti.type AS TYPE_NAME, 0 AS COLUMN_SIZE," +
+                "NULL AS REMARKS,pti.cid AS ORDINAL_POSITION " +
+                "FROM all_tables at INNER JOIN pragma_table_info(at.tn) pti\n" +
+                "ORDER BY TABLE_NAME");
     }
 
     @Override
-    public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
+    public ResultSet getPrimaryKeys(String catalog, String schema, String tableName) throws SQLException {
+        String table = tableName;
         PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(connection, table);
         String[] columns = pkFinder.getColumns();
 
@@ -141,12 +145,9 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
         for (int i = 0; i < columns.length; i++) {
             if (i > 0) sql.append(" union ");
             sql.append("select ")
-                .append(pkName)
-                .append(" as pk, '")
-                .append(LibSqlUtils.escape(LibSqlUtils.unquote(columns[i])))
-                .append("' as cn, ")
-                .append(i + 1)
-                .append(" as ks");
+                .append(pkName).append(" as pk, '")
+                .append(LibSqlUtils.escape(LibSqlUtils.unquote(columns[i]))).append("' as cn, ")
+                .append(i + 1).append(" as ks");
         }
 
         sql.append(") order by cn;");

@@ -58,6 +58,9 @@ public class LibSqlClient {
         try {
             HttpURLConnection conn = openConnection();
             conn.setRequestMethod("POST");
+            conn.setRequestProperty("User-Agent",
+                LibSqlConstants.DRIVER_INFO + " " +
+                LibSqlConstants.DRIVER_VERSION_MAJOR + "." + LibSqlConstants.DRIVER_VERSION_MINOR);
             conn.setDoOutput(true);
 
             try (OutputStream os = conn.getOutputStream()) {
