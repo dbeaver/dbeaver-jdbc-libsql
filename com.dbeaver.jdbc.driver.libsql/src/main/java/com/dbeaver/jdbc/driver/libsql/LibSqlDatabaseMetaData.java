@@ -47,7 +47,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
             return;
         }
         try {
-            HttpURLConnection con = connection.getClient().openConnection("version");
+            HttpURLConnection con = connection.getClient().openSimpleConnection("version");
             try (InputStream is = con.getInputStream()) {
                 serverVersion = IOUtils.readLine(is);
             }

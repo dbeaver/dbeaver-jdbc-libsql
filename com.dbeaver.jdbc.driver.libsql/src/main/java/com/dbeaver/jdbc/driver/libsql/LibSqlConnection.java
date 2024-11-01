@@ -57,7 +57,7 @@ public class LibSqlConnection extends AbstractJdbcConnection {
             throw new SQLException(e);
         }
         // Verify connection
-        getMetaData().getDatabaseProductName();
+        LibSqlUtils.executeQuery(this, "SELECT 1");
     }
 
     public LibSqlClient getClient() {

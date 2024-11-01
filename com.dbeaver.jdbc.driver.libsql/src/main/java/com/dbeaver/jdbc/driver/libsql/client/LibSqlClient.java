@@ -10,16 +10,18 @@ import org.jkiss.code.NotNull;
 import org.jkiss.code.Nullable;
 import org.jkiss.utils.CommonUtils;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
+import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Executors;
 
 /**
  * The entry point to LibSQL client API.
@@ -34,10 +36,16 @@ public class LibSqlClient {
 
     private final URL url;
     private final String authToken;
+    private final HttpClient client;
 
     public LibSqlClient(URL url, String authToken) {
         this.url = url;
         this.authToken = authToken;
+
+        HttpClient.Builder builder = HttpClient.newBuilder()
+            .executor(Executors.newSingleThreadExecutor())
+            .cookieHandler(new CookieManager());
+        this.client = builder.build();
     }
 
     /**
@@ -56,29 +64,49 @@ public class LibSqlClient {
         @NotNull String[] stmts,
         @Nullable Map<Object, Object>[] parameters) throws SQLException {
         try {
-            HttpURLConnection conn = openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("User-Agent",
-                LibSqlConstants.DRIVER_INFO + " " +
-                LibSqlConstants.DRIVER_VERSION_MAJOR + "." + LibSqlConstants.DRIVER_VERSION_MINOR);
-            conn.setDoOutput(true);
+            StringWriter requestBuffer = new StringWriter();
+            executeQuery(stmts, parameters, requestBuffer);
 
-            try (OutputStream os = conn.getOutputStream()) {
-                executeQuery(stmts, parameters, os);
+            final HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(url.toURI())
+                .version(HttpClient.Version.HTTP_1_1)
+                //.header("Content-Type", "application/json")
+                .header("User-Agent",
+                    LibSqlConstants.DRIVER_INFO + " " + LibSqlConstants.DRIVER_VERSION_MAJOR + "." + LibSqlConstants.DRIVER_VERSION_MAJOR)
+                .POST(HttpRequest.BodyPublishers.ofString(requestBuffer.toString()));
+            if (authToken != null) {
+                builder.header("Authorization", "Bearer " + authToken);
             }
-            try (InputStreamReader in = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8)) {
-                //String responseStr = IOUtils.readToString(in);
-                Response[] response = gson.fromJson(in, Response[].class);
-                LibSqlExecutionResult[] resultSets = new LibSqlExecutionResult[response.length];
-                for (int i = 0; i < response.length; i++) {
-                    if (!CommonUtils.isEmpty(response[i].error)) {
-                        throw new SQLException(response[i].error);
+
+            HttpResponse.BodyHandler<String> readerBodyHandler =
+                info -> HttpResponse.BodySubscribers.ofString(StandardCharsets.UTF_8);
+
+            final HttpResponse<String> httpResponse = client.send(
+                builder.build(),
+                readerBodyHandler
+            );
+            try {
+                String responseBody = httpResponse.body();
+                try (Reader isr = new StringReader(responseBody)) {
+                    Response[] response;
+                    if (responseBody.startsWith("[")) {
+                        response = gson.fromJson(isr, Response[].class);
+                    } else {
+                        response = new Response[] {
+                            gson.fromJson(isr, Response.class)
+                        };
                     }
-                    resultSets[i] = response[i].results;
+                    LibSqlExecutionResult[] resultSets = new LibSqlExecutionResult[response.length];
+                    for (int i = 0; i < response.length; i++) {
+                        if (!CommonUtils.isEmpty(response[i].error)) {
+                            throw new SQLException(response[i].error);
+                        }
+                        resultSets[i] = response[i].results;
+                    }
+                    return resultSets;
                 }
-                return resultSets;
-            } catch (IOException e) {
-                switch (conn.getResponseCode()) {
+            } catch (Exception e) {
+                switch (httpResponse.statusCode()) {
                     case HttpURLConnection.HTTP_UNAUTHORIZED ->
                         throw new SQLException("Authentication required", e);
                     case HttpURLConnection.HTTP_FORBIDDEN ->
@@ -86,41 +114,30 @@ public class LibSqlClient {
                 }
                 throw e;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
+            if (e instanceof SQLException sqle) {
+                throw sqle;
+            }
             throw new SQLException(e);
         }
 
     }
 
-    public HttpURLConnection openConnection() throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) this.url.openConnection();
-        setAuthParameters(conn);
-        return conn;
-    }
-
-    public HttpURLConnection openConnection(String endpoint) throws IOException {
+    public HttpURLConnection openSimpleConnection(String endpoint) throws IOException {
         String baseURL = url.toString();
         if (!baseURL.endsWith("/")) {
             baseURL += "/";
         }
         baseURL += endpoint;
-        HttpURLConnection conn = (HttpURLConnection) new URL(baseURL).openConnection();
-        setAuthParameters(conn);
-        return conn;
-    }
-
-    private void setAuthParameters(HttpURLConnection conn) {
-        if (authToken != null) {
-            conn.setRequestProperty("Authorization", "Bearer " + authToken);
-        }
+        return (HttpURLConnection) new URL(baseURL).openConnection();
     }
 
     private void executeQuery(
         @NotNull String[] queries,
         @Nullable Map<Object, Object>[] parameters,
-        @NotNull OutputStream os
+        @NotNull Writer os
     ) throws IOException {
-        JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
+        JsonWriter jsonWriter = new JsonWriter(os);
         jsonWriter.beginObject();
         jsonWriter.name("statements");
         jsonWriter.beginArray();
