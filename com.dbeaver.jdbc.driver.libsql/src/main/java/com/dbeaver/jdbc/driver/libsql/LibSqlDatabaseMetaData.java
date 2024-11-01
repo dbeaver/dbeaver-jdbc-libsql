@@ -113,7 +113,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
         }
         return executeQuery(
             "WITH all_tables AS (SELECT name AS tn FROM sqlite_master WHERE type = 'table'" +
-                (tableName == null ? "" : " and name=" + LibSqlUtils.escape(tableName)) + ") \n" +
+                (tableName == null ? "" : " and name=" + LibSqlUtils.quote(tableName)) + ") \n" +
                 "SELECT NULL as TABLE_CAT, NULL AS TABLE_SCHEM, at.tn as TABLE_NAME,\n" +
                 "pti.name as COLUMN_NAME," + Types.VARCHAR + " AS DATA_TYPE, pti.type AS TYPE_NAME, 0 AS COLUMN_SIZE," +
                 "NULL AS REMARKS,pti.cid AS ORDINAL_POSITION " +
