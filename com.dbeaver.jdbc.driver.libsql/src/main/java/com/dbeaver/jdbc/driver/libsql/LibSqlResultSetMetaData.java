@@ -16,13 +16,23 @@
  */
 package com.dbeaver.jdbc.driver.libsql;
 
+import com.dbeaver.jdbc.driver.libsql.client.LibSqlExecutionResult;
 import com.dbeaver.jdbc.model.AbstractJdbcResultSetMetaData;
 import org.jkiss.code.NotNull;
+import org.jkiss.utils.CommonUtils;
 
 import java.sql.SQLException;
 import java.sql.Types;
 
 public class LibSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LibSqlStatement> {
+
+    // We have json data.
+    // Thus we can distinguish strings, numbers and booleans
+    private enum ResultColumnDataType {
+        BOOLEAN,
+        NUMBER,
+        STRING,
+    }
 
     @NotNull
     private final LibSqlResultSet resultSet;
@@ -30,6 +40,19 @@ public class LibSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LibSq
     public LibSqlResultSetMetaData(@NotNull LibSqlResultSet resultSet) throws SQLException {
         super(resultSet.getStatement());
         this.resultSet = resultSet;
+    }
+
+    private ResultColumnDataType getDataTypeFromData(int column) {
+        LibSqlExecutionResult result = resultSet.getResult();
+        if (result != null && !CommonUtils.isEmpty(result.getRows())) {
+            Object columnValue = result.getRows().get(0)[column];
+            if (columnValue instanceof Boolean) {
+                return ResultColumnDataType.BOOLEAN;
+            } else if (columnValue instanceof Number) {
+                return ResultColumnDataType.NUMBER;
+            }
+        }
+        return ResultColumnDataType.STRING;
     }
 
     @Override
@@ -109,12 +132,22 @@ public class LibSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LibSq
 
     @Override
     public int getColumnType(int column) throws SQLException {
-        return Types.VARCHAR;
+        return switch (getDataTypeFromData(column)) {
+            case BOOLEAN -> Types.BOOLEAN;
+            case NUMBER -> Types.NUMERIC;
+            case STRING -> Types.VARCHAR;
+            default -> Types.OTHER;
+        };
     }
 
     @Override
     public String getColumnTypeName(int column) throws SQLException {
-        return "VARCHAR";
+        return switch (getDataTypeFromData(column)) {
+            case BOOLEAN -> "BOOLEAN";
+            case NUMBER -> "NUMERIC";
+            case STRING -> "VARCHAR";
+            default -> "UNKNOWN";
+        };
     }
 
     @Override

@@ -19,6 +19,7 @@ package com.dbeaver.jdbc.driver.libsql;
 import com.dbeaver.jdbc.driver.libsql.client.LibSqlExecutionResult;
 import com.dbeaver.jdbc.model.AbstractJdbcResultSet;
 import org.jkiss.code.NotNull;
+import org.jkiss.code.Nullable;
 import org.jkiss.utils.CommonUtils;
 
 import java.io.InputStream;
@@ -31,19 +32,19 @@ import java.util.Map;
 
 public class LibSqlResultSet extends AbstractJdbcResultSet<LibSqlStatement, LibSqlResultSetMetaData> {
 
-    @NotNull
+    @Nullable
     private final LibSqlExecutionResult result;
     private transient int cursor = 0;
     private transient boolean closed;
     private transient boolean wasNull;
     private transient Map<String, Integer> nameMap;
 
-    public LibSqlResultSet(@NotNull LibSqlStatement statement, @NotNull LibSqlExecutionResult result) {
+    public LibSqlResultSet(@NotNull LibSqlStatement statement, @Nullable LibSqlExecutionResult result) {
         super(statement, null);
         this.result = result;
     }
 
-    @NotNull
+    @Nullable
     public LibSqlExecutionResult getResult() {
         return result;
     }
