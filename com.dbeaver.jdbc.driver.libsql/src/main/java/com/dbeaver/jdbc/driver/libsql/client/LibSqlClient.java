@@ -91,7 +91,7 @@ public class LibSqlClient {
             final HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(url.toURI())
                 .version(HttpClient.Version.HTTP_1_1)
-                //.header("Content-Type", "application/json")
+                .header("Content-Type", "application/json")
                 .header("User-Agent", userAgent)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBuffer.toString()));
             if (authToken != null) {
@@ -149,7 +149,9 @@ public class LibSqlClient {
             baseURL += "/";
         }
         baseURL += endpoint;
-        return (HttpURLConnection) new URL(baseURL).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) new URL(baseURL).openConnection();
+        connection.setRequestProperty("User-Agent", userAgent);
+        return connection;
     }
 
     private void executeQuery(
