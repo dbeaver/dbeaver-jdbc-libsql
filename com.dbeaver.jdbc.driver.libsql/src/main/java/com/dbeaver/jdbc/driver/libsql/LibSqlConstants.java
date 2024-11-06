@@ -25,6 +25,7 @@ public class LibSqlConstants {
 
     public static final int DRIVER_VERSION_MAJOR = 1;
     public static final int DRIVER_VERSION_MINOR = 0;
+    public static final int DRIVER_VERSION_MICRO = 1;
 
     public static final String DRIVER_NAME = "LibSQL";
     public static final String DRIVER_INFO = "DBeaver LibSQL JDBC driver";

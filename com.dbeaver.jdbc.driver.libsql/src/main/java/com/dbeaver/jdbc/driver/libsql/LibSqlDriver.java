@@ -72,6 +72,10 @@ public class LibSqlDriver implements Driver {
         return LibSqlConstants.DRIVER_VERSION_MINOR;
     }
 
+    public int getMicroVersion() {
+        return LibSqlConstants.DRIVER_VERSION_MICRO;
+    }
+
     @Override
     public boolean jdbcCompliant() {
         return true;
@@ -87,6 +91,7 @@ public class LibSqlDriver implements Driver {
     }
 
     public String getFullVersion() {
-        return getMajorVersion() + "." + getMinorVersion() + " (" + LibSqlConstants.DRIVER_INFO + ")";
+        return getMajorVersion() + "." + getMinorVersion() + "." + getMicroVersion() +
+               " (" + LibSqlConstants.DRIVER_INFO + ")";
     }
 }

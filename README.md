@@ -10,6 +10,17 @@ LibSQL [JDBC](https://en.wikipedia.org/wiki/JDBC_driver) is a library for access
 - It supports prepared statements, database metadata, resultsets, data types and most of other JDBC features
 - It is included in [DBeaver](https://github.com/dbeaver/dbeaver) and [CloudBeaver](https://github.com/dbeaver/cloudbeaver) as default LibSQL driver. However, it can be used in any other products/frameworks which rely on JDBC API
 
+## Usage
+
+JDBC URL format: `jdbc:dbeaver:libsql:<server-url>`  
+Server URL is a full URL including schema and port. For example:
+- `jdbc:dbeaver:libsql:http://localhost:1234`
+- `jdbc:dbeaver:libsql:https://test-test.turso.io`
+
+Token based authentication supported in version 1.0. Pass token value as password, leave the username empty.  
+
+Driver class name: `com.dbeaver.jdbc.driver.libsql.LibSqlDriver`
+
 ## License
 
 Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
@@ -21,7 +32,7 @@ Download from Maven Central or from the releases page.
     <dependency>
       <groupId>com.dbeaver.jdbc</groupId>
       <artifactId>com.dbeaver.jdbc.driver.libsql</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
     </dependency>
 </dependencies>
 ```
