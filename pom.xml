@@ -6,9 +6,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.dbeaver.jdbc.libsql</groupId>
     <artifactId>jdbc-libsql</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+
     <packaging>pom</packaging>
     <name>DBeaver LibSQL JDBC Project</name>
-    <version>1.0.0-SNAPSHOT</version>
+    <description>LibSQL JDBC driver</description>
+    <url>https://github.com/dbeaver/dbeaver-jdbc-libsql</url>
 
     <parent>
         <groupId>com.dbeaver.common</groupId>

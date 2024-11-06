@@ -14,10 +14,12 @@ LibSQL [JDBC](https://en.wikipedia.org/wiki/JDBC_driver) is a library for access
 
 JDBC URL format: `jdbc:dbeaver:libsql:<server-url>`  
 Server URL is a full URL including schema and port. For example:
-- http://localhost:1234
-- https://test-test.turso.io
+- `jdbc:dbeaver:libsql:http://localhost:1234`
+- `jdbc:dbeaver:libsql:https://test-test.turso.io`
 
-Token based authentication supported in version 1.0. Pass token value as password.  
+Token based authentication supported in version 1.0. Pass token value as password, leave the username empty.  
+
+Driver class name: `com.dbeaver.jdbc.driver.libsql.LibSqlDriver`
 
 ## License
 
@@ -30,7 +32,7 @@ Download from Maven Central or from the releases page.
     <dependency>
       <groupId>com.dbeaver.jdbc</groupId>
       <artifactId>com.dbeaver.jdbc.driver.libsql</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
     </dependency>
 </dependencies>
 ```
