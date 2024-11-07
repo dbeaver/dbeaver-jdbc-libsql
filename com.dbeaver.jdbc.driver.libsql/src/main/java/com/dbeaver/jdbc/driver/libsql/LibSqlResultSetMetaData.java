@@ -45,7 +45,7 @@ public class LibSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LibSq
     private ResultColumnDataType getDataTypeFromData(int column) {
         LibSqlExecutionResult result = resultSet.getResult();
         if (result != null && !CommonUtils.isEmpty(result.getRows())) {
-            Object columnValue = result.getRows().get(0)[column];
+            Object columnValue = result.getRows().get(0)[column - 1];
             if (columnValue instanceof Boolean) {
                 return ResultColumnDataType.BOOLEAN;
             } else if (columnValue instanceof Number) {

@@ -100,6 +100,7 @@ public class LibSqlConnection extends AbstractJdbcConnection {
 
     @Override
     public void close() throws SQLException {
+        client.close();
     }
 
     @Override
