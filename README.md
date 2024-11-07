@@ -21,6 +21,30 @@ Token based authentication supported in version 1.0. Pass token value as passwor
 
 Driver class name: `com.dbeaver.jdbc.driver.libsql.LibSqlDriver`
 
+## Example
+
+```java
+import java.sql.*;
+
+public class LibSqlTest {
+    public static void main(String[] args) throws Exception {
+        String databaseUrl = "http://libsql-server.company.local:8080";
+        try (Connection connection = DriverManager.getConnection("jdbc:dbeaver:libsql:" + databaseUrl)) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("drop table if exists test_table_1");
+                statement.execute("create table test_table_1 (id integer, name string)");
+                statement.execute("insert into test_table_1 values(1, 'test one')");
+                statement.execute("insert into test_table_1 values(2, 'test two')");
+                try (ResultSet rs = statement.executeQuery("select * from test_table_1")) {
+                    while (rs.next()) {
+                        System.out.println(rs.getInt("id") + " = " + rs.getString("name"));
+                    }
+                }
+            }
+        }
+    }
+}
+```
 ## License
 
 Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
