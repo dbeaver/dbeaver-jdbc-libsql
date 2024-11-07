@@ -19,6 +19,10 @@ package com.dbeaver.jdbc.upd.driver.test;
 import java.sql.*;
 
 public class LibSqlDriverTest {
+    /**
+     * Runs simple select query in LibSQL
+     * @param args mvn exec:java "-Dexec.args=database-url [token]"
+     */
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();
 
