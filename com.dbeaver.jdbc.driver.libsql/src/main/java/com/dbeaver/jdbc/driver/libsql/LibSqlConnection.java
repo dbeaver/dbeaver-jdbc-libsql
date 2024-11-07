@@ -65,6 +65,9 @@ public class LibSqlConnection extends AbstractJdbcConnection {
         }
     }
 
+    /**
+     * Obtain transport client
+     */
     public LibSqlClient getClient() {
         String applicationName = getClientApplicationName();
         if (!CommonUtils.isEmpty(applicationName)) {
