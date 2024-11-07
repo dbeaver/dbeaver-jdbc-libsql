@@ -54,16 +54,19 @@ public class LibSqlClient {
     private final URL url;
     private final String authToken;
     private final ExecutorService clientExecutor;
-    private String userAgent = LibSqlConstants.DRIVER_INFO + " " + LibSqlConstants.DRIVER_VERSION_MAJOR + "." + LibSqlConstants.DRIVER_VERSION_MAJOR;
+    private String userAgent = LibSqlConstants.DRIVER_INFO + " " +
+        LibSqlConstants.DRIVER_VERSION_MAJOR +
+        "." + LibSqlConstants.DRIVER_VERSION_MAJOR +
+        "." + LibSqlConstants.DRIVER_VERSION_MICRO;
     private final HttpClient client;
 
     public LibSqlClient(URL url, String authToken) {
         this.url = url;
         this.authToken = authToken;
 
-        clientExecutor = Executors.newSingleThreadExecutor();
+        this.clientExecutor = Executors.newSingleThreadExecutor();
         HttpClient.Builder builder = HttpClient.newBuilder()
-            .executor(clientExecutor)
+            .executor(this.clientExecutor)
             .cookieHandler(new CookieManager());
         this.client = builder.build();
     }
@@ -225,6 +228,9 @@ public class LibSqlClient {
         }
     }
 
+    /**
+     * Closes client. Terminates client executor.
+     */
     public void close() {
         clientExecutor.shutdown();
     }

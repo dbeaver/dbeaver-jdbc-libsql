@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
 public class LibSqlDriver implements Driver {
+
     static {
         Logger logger = Logger.getLogger("com.dbeaver.jdbc.upd.driver.driver");
         parentLogger = logger;
@@ -36,7 +37,8 @@ public class LibSqlDriver implements Driver {
             logger.log(Level.SEVERE, "Could not register driver", e);
         }
     }
-    static final java.util.logging.Logger parentLogger;
+
+    private static final java.util.logging.Logger parentLogger;
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
