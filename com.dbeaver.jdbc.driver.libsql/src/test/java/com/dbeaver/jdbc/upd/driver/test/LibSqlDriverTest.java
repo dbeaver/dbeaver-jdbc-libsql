@@ -16,8 +16,6 @@
  */
 package com.dbeaver.jdbc.upd.driver.test;
 
-import com.dbeaver.jdbc.driver.libsql.LibSqlDriver;
-
 import java.sql.*;
 import java.util.Properties;
 
@@ -26,9 +24,8 @@ public class LibSqlDriverTest {
         long startTime = System.currentTimeMillis();
 
         try {
-            LibSqlDriver driver = new LibSqlDriver();
             Properties props = new Properties();
-            try (Connection connection = driver.connect("jdbc:dbeaver:libsql:" + args[0], props)) {
+            try (Connection connection = DriverManager.getConnection("jdbc:dbeaver:libsql:" + args[0], props)) {
                 DatabaseMetaData metaData = connection.getMetaData();
                 System.out.println("Driver: " + metaData.getDriverName());
                 System.out.println("Database: " + metaData.getDatabaseProductName() + " " + metaData.getDatabaseProductVersion());

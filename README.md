@@ -32,7 +32,7 @@ Download from Maven Central or from the releases page.
     <dependency>
       <groupId>com.dbeaver.jdbc</groupId>
       <artifactId>com.dbeaver.jdbc.driver.libsql</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.2</version>
     </dependency>
 </dependencies>
 ```

@@ -17,20 +17,26 @@
 package com.dbeaver.jdbc.driver.libsql;
 
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
 public class LibSqlDriver implements Driver {
-
-    static final java.util.logging.Logger parentLogger = java.util.logging.Logger.getLogger("com.dbeaver.jdbc.upd.driver.driver");
+    static {
+        Logger logger = Logger.getLogger("com.dbeaver.jdbc.upd.driver.driver");
+        parentLogger = logger;
+        try {
+            DriverManager.registerDriver(new LibSqlDriver());
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Could not register driver", e);
+        }
+    }
+    static final java.util.logging.Logger parentLogger;
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {

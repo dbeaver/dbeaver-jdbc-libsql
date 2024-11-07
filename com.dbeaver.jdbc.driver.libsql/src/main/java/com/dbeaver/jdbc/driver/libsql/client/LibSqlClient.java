@@ -37,6 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -52,6 +53,7 @@ public class LibSqlClient {
 
     private final URL url;
     private final String authToken;
+    private final ExecutorService clientExecutor;
     private String userAgent = LibSqlConstants.DRIVER_INFO + " " + LibSqlConstants.DRIVER_VERSION_MAJOR + "." + LibSqlConstants.DRIVER_VERSION_MAJOR;
     private final HttpClient client;
 
@@ -59,8 +61,9 @@ public class LibSqlClient {
         this.url = url;
         this.authToken = authToken;
 
+        clientExecutor = Executors.newSingleThreadExecutor();
         HttpClient.Builder builder = HttpClient.newBuilder()
-            .executor(Executors.newSingleThreadExecutor())
+            .executor(clientExecutor)
             .cookieHandler(new CookieManager());
         this.client = builder.build();
     }
@@ -220,6 +223,10 @@ public class LibSqlClient {
         } else {
             jsonWriter.value(value.toString());
         }
+    }
+
+    public void close() {
+        clientExecutor.shutdown();
     }
 
     private static class Response {
