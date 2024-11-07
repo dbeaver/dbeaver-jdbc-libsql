@@ -17,15 +17,15 @@
 package com.dbeaver.jdbc.upd.driver.test;
 
 import java.sql.*;
-import java.util.Properties;
 
 public class LibSqlDriverTest {
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();
 
         try {
-            Properties props = new Properties();
-            try (Connection connection = DriverManager.getConnection("jdbc:dbeaver:libsql:" + args[0], props)) {
+            String databaseUrl = args[0];
+            String token = args.length > 1 ? args[1] : null;
+            try (Connection connection = DriverManager.getConnection("jdbc:dbeaver:libsql:" + databaseUrl, null, token)) {
                 DatabaseMetaData metaData = connection.getMetaData();
                 System.out.println("Driver: " + metaData.getDriverName());
                 System.out.println("Database: " + metaData.getDatabaseProductName() + " " + metaData.getDatabaseProductVersion());
