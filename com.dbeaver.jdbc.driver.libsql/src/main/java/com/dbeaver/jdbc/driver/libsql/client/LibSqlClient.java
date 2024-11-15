@@ -100,7 +100,7 @@ public class LibSqlClient {
                 .header("Content-Type", "application/json")
                 .header("User-Agent", userAgent)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBuffer.toString()));
-            if (authToken != null) {
+            if (!CommonUtils.isEmpty(authToken)) {
                 builder.header("Authorization", "Bearer " + authToken);
             }
 
