@@ -23,6 +23,7 @@ import org.jkiss.utils.CommonUtils;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 
 public class LibSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LibSqlStatement> {
 
@@ -102,7 +103,11 @@ public class LibSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LibSq
 
     @Override
     public String getColumnName(int column) throws SQLException {
-        return resultSet.getResult().getColumns().get(column - 1);
+        List<String> columns = resultSet.getResult().getColumns();
+        if (column < 1 || column > columns.size()) {
+            throw new SQLException("Column index out of bounds: " + column + "/" + columns.size());
+        }
+        return columns.get(column - 1);
     }
 
     @Override

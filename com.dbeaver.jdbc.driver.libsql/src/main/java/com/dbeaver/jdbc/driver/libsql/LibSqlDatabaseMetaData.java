@@ -114,9 +114,31 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
         return executeQuery(
             "WITH all_tables AS (SELECT name AS tn FROM sqlite_master WHERE type = 'table'" +
                 (tableName == null ? "" : " and name=" + LibSqlUtils.quote(tableName)) + ") \n" +
-                "SELECT NULL as TABLE_CAT, NULL AS TABLE_SCHEM, at.tn as TABLE_NAME,\n" +
-                "pti.name as COLUMN_NAME," + Types.VARCHAR + " AS DATA_TYPE, pti.type AS TYPE_NAME, 0 AS COLUMN_SIZE," +
-                "NULL AS REMARKS,pti.cid AS ORDINAL_POSITION " +
+                "SELECT " +
+                    "NULL as TABLE_CAT, " +
+                    "NULL AS TABLE_SCHEM, " +
+                    "at.tn as TABLE_NAME,\n" +
+                    "pti.name as COLUMN_NAME," +
+                    Types.VARCHAR + " AS DATA_TYPE," +
+                    "pti.type AS TYPE_NAME," +
+                    "0 AS COLUMN_SIZE," +
+                    "0 as COLUMN_SIZE," +
+                    "0 as BUFFER_LENGTH," +
+                    "0 as DECIMAL_DIGITS,\n" +
+                    columnNullable + " as NULLABLE," +
+                    "NULL as REMARKS," +
+                    "NULL as COLUMN_DEF," +
+                    "0 as SQL_DATA_TYPE," +
+                    "0 as SQL_DATETIME_SUB," +
+                    "0 as CHAR_OCTET_LENGTH," +
+                    "pti.cid as ORDINAL_POSITION," +
+                    "'' as IS_NULLABLE," +
+                    "NULL as SCOPE_CATALOG," +
+                    "NULL as SCOPE_SCHEMA," +
+                    "NULL as SCOPE_TABLE," +
+                    "NULL as SOURCE_DATA_TYPE," +
+                    "'' as IS_AUTOINCREMENT," +
+                    "'' as IS_GENERATEDCOLUMN\n" +
                 "FROM all_tables at INNER JOIN pragma_table_info(at.tn) pti\n" +
                 "ORDER BY TABLE_NAME");
     }
