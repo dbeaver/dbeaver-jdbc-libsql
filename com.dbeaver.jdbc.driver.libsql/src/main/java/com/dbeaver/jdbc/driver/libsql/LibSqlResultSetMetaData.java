@@ -137,22 +137,30 @@ public class LibSqlResultSetMetaData extends AbstractJdbcResultSetMetaData<LibSq
 
     @Override
     public int getColumnType(int column) throws SQLException {
-        return switch (getDataTypeFromData(column)) {
-            case BOOLEAN -> Types.BOOLEAN;
-            case NUMBER -> Types.NUMERIC;
-            case STRING -> Types.VARCHAR;
-            default -> Types.OTHER;
-        };
+        switch (getDataTypeFromData(column)) {
+            case BOOLEAN:
+                return Types.BOOLEAN;
+            case NUMBER:
+                return Types.NUMERIC;
+            case STRING:
+                return Types.VARCHAR;
+            default:
+                return Types.OTHER;
+        }
     }
 
     @Override
     public String getColumnTypeName(int column) throws SQLException {
-        return switch (getDataTypeFromData(column)) {
-            case BOOLEAN -> "BOOLEAN";
-            case NUMBER -> "NUMERIC";
-            case STRING -> "VARCHAR";
-            default -> "UNKNOWN";
-        };
+        switch (getDataTypeFromData(column)) {
+            case BOOLEAN:
+                return "BOOLEAN";
+            case NUMBER:
+                return "NUMERIC";
+            case STRING:
+                return "VARCHAR";
+            default:
+                return "UNKNOWN";
+        }
     }
 
     @Override
