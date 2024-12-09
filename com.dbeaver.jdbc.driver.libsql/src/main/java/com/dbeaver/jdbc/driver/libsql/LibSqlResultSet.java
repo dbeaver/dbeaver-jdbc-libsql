@@ -134,8 +134,8 @@ public class LibSqlResultSet extends AbstractJdbcResultSet<LibSqlStatement, LibS
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
         Object object = getObject(columnIndex);
         return object == null ? null :
-            object instanceof BigDecimal bd ? bd :
-                object instanceof Long str ? BigDecimal.valueOf(str) : BigDecimal.valueOf(CommonUtils.toDouble(object));
+            object instanceof BigDecimal ? (BigDecimal) object :
+                object instanceof Long ? BigDecimal.valueOf((Long) object) : BigDecimal.valueOf(CommonUtils.toDouble(object));
     }
 
     @Override
@@ -221,8 +221,8 @@ public class LibSqlResultSet extends AbstractJdbcResultSet<LibSqlStatement, LibS
     public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
         Object object = getObject(columnLabel);
         return object == null ? null :
-            object instanceof BigDecimal bd ? bd :
-                object instanceof Long str ? BigDecimal.valueOf(str) : BigDecimal.valueOf(CommonUtils.toDouble(object));
+            object instanceof BigDecimal ? (BigDecimal) object :
+                object instanceof Long ? BigDecimal.valueOf((Long) object) : BigDecimal.valueOf(CommonUtils.toDouble(object));
     }
 
     @Override

@@ -133,15 +133,16 @@ public class LibSqlClient {
                 }
             } catch (Exception e) {
                 switch (httpResponse.statusCode()) {
-                    case HttpURLConnection.HTTP_UNAUTHORIZED ->
+                    case HttpURLConnection.HTTP_UNAUTHORIZED:
                         throw new SQLException("Authentication required", e);
-                    case HttpURLConnection.HTTP_FORBIDDEN ->
+                    case HttpURLConnection.HTTP_FORBIDDEN:
                         throw new SQLException("Access denied", e);
                 }
                 throw e;
             }
         } catch (Exception e) {
-            if (e instanceof SQLException sqle) {
+            if (e instanceof SQLException) {
+                SQLException sqle = (SQLException) e;
                 throw sqle;
             }
             throw new SQLException(e);
@@ -217,11 +218,14 @@ public class LibSqlClient {
     private static void serializeParameterValue(Object value, JsonWriter jsonWriter) throws IOException {
         if (value == null) {
             jsonWriter.nullValue();
-        } else if (value instanceof Number nValue) {
+        } else if (value instanceof Number) {
+            Number nValue = (Number) value;
             jsonWriter.value(nValue);
-        } else if (value instanceof Boolean bValue) {
+        } else if (value instanceof Boolean) {
+            Boolean bValue = (Boolean) value;
             jsonWriter.value(bValue);
-        } else if (value instanceof String strValue) {
+        } else if (value instanceof String) {
+            String strValue = (String) value;
             jsonWriter.value(strValue);
         } else {
             jsonWriter.value(value.toString());
