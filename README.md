@@ -11,6 +11,11 @@ Turso LibSQL [JDBC](https://en.wikipedia.org/wiki/JDBC_driver) is a library for 
 - It supports Turso and local LibSQL servers
 - It is included in [DBeaver](https://github.com/dbeaver/dbeaver) and [CloudBeaver](https://github.com/dbeaver/cloudbeaver) as default LibSQL driver. However, it can be used in any other products/frameworks which rely on JDBC API
 
+## Reqirements
+
+- Java 17
+- Maven
+
 ## Usage
 
 JDBC URL format: `jdbc:dbeaver:libsql:<server-url>`  
