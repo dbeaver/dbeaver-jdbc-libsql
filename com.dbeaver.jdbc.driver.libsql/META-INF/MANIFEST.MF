@@ -8,7 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.dbeaver.jdbc.driver.libsql,
  com.dbeaver.jdbc.driver.libsql.client
 Require-Bundle: com.dbeaver.jdbc.api,
- com.dbeaver.rpc,
  org.jkiss.utils,
  com.google.gson
 Bundle-Vendor: DBeaver Corp
