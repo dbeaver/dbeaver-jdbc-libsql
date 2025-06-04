@@ -12,6 +12,9 @@
     <name>DBeaver LibSQL JDBC Project</name>
     <description>LibSQL JDBC driver</description>
     <url>https://github.com/dbeaver/dbeaver-jdbc-libsql</url>
+    <properties>
+        <java.version>${java.version.drivers}</java.version>
+    </properties>
 
     <parent>
         <groupId>com.dbeaver.common</groupId>
