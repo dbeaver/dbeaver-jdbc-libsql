@@ -46,9 +46,10 @@ public class LibSqlDriver implements Driver {
         if (!matcher.matches()) {
             throw new LibSqlException(
                 "Invalid connection URL: " + url +
-                ".\nExpected URL format: " + LibSqlConstants.CONNECTION_URL_EXAMPLE);
+                ".\nExpected URL formats: " + LibSqlConstants.CONNECTION_URL_EXAMPLES);
         }
-        String targetUrl = matcher.group(1);
+        String targetUrl = matcher.group(0)
+            .replaceAll(LibSqlConstants.CONNECTION_PROTOCOLS_REGEXP, "https://");
 
         Map<String, Object> props = new LinkedHashMap<>();
         for (Enumeration<?> pne = info.propertyNames(); pne.hasMoreElements(); ) {
