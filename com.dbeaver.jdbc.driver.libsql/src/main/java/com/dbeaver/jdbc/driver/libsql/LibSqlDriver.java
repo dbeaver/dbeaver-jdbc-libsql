@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 
 public class LibSqlDriver implements Driver {
 
@@ -42,18 +41,7 @@ public class LibSqlDriver implements Driver {
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
-        Matcher matcher = LibSqlConstants.CONNECTION_URL_PATTERN.matcher(url);
-        if (!matcher.matches()) {
-            throw new LibSqlException(
-                "Invalid connection URL: " + url +
-                ".\nExpected URL formats: " + LibSqlConstants.CONNECTION_URL_EXAMPLES);
-        }
-
-        String targetUrl = url.replaceFirst("jdbc:dbeaver:libsql:", "");
-        if (targetUrl.startsWith("libsql://")) {
-            targetUrl = targetUrl.replaceFirst("libsql://", "https://");
-        }
-
+        String targetUrl = LibSqlUtils.validateAndFormatUrl(url);
         Map<String, Object> props = new LinkedHashMap<>();
         for (Enumeration<?> pne = info.propertyNames(); pne.hasMoreElements(); ) {
             String propName = (String) pne.nextElement();

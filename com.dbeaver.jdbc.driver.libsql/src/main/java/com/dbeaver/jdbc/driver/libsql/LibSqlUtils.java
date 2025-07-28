@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.regex.Matcher;
 
 public class LibSqlUtils {
 
@@ -65,5 +66,21 @@ public class LibSqlUtils {
         try (Statement stat = connection.createStatement()) {
             return stat.executeQuery(query);
         }
+    }
+
+    public static String validateAndFormatUrl(String url) throws LibSqlException {
+        Matcher matcher = LibSqlConstants.CONNECTION_URL_PATTERN.matcher(url);
+        if (!matcher.matches()) {
+            throw new LibSqlException(
+                "Invalid connection URL: " + url +
+                    ".\nExpected URL formats: " + LibSqlConstants.CONNECTION_URL_EXAMPLES
+            );
+        }
+
+        String formattedUrl = url.replaceFirst("jdbc:dbeaver:libsql:", "");
+        if (formattedUrl.startsWith("libsql://")) {
+            formattedUrl = formattedUrl.replaceFirst("libsql://", "https://");
+        }
+        return formattedUrl;
     }
 }
