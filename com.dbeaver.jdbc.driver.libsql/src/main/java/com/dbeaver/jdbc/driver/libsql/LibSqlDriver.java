@@ -49,10 +49,9 @@ public class LibSqlDriver implements Driver {
                 ".\nExpected URL formats: " + LibSqlConstants.CONNECTION_URL_EXAMPLES);
         }
 
-        String targetUrl = url.replace("jdbc:dbeaver:libsql:", "");
-        if (!targetUrl.startsWith("http")) {
-            targetUrl = matcher.group(0)
-                .replaceAll(LibSqlConstants.CONNECTION_PROTOCOLS_REGEXP, "https://");
+        String targetUrl = url.replaceFirst("jdbc:dbeaver:libsql:", "");
+        if (targetUrl.startsWith("libsql://")) {
+            targetUrl = targetUrl.replaceFirst("libsql://", "https://");
         }
 
         Map<String, Object> props = new LinkedHashMap<>();
