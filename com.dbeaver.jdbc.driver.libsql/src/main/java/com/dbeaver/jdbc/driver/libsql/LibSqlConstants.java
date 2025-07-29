@@ -22,7 +22,7 @@ public class LibSqlConstants {
 
     public static final String CONNECTION_URL_EXAMPLES = "jdbc:dbeaver:libsql:<hostname>, libsql://<hostname>";
     public static final Pattern CONNECTION_URL_PATTERN =
-        Pattern.compile("(jdbc:dbeaver:libsql:|libsql://)[a-z0-9/:.-]+");
+        Pattern.compile("(jdbc:dbeaver:libsql:|libsql://).*");
 
     public static final int DRIVER_VERSION_MAJOR = 1;
     public static final int DRIVER_VERSION_MINOR = 0;

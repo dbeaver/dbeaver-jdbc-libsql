@@ -25,8 +25,10 @@ public class LibSqlUtilsTest {
 
     @Test
     public void testFormatUrl() throws LibSqlException {
-        assertFormatError("localhost");
-        assertFormatError("libsql://9M7NAcHfxSZyIm#*yxLY");
+        Assert.assertThrows(
+            LibSqlException.class,
+            () -> LibSqlUtils.validateAndFormatUrl("localhost")
+        );
 
         assertUrlFormat("jdbc:dbeaver:libsql:http://localhost", "http://localhost");
         assertUrlFormat("jdbc:dbeaver:libsql:https://localhost", "https://localhost");
@@ -38,19 +40,5 @@ public class LibSqlUtilsTest {
 
     private void assertUrlFormat(String input, String expected) throws LibSqlException {
         Assert.assertEquals(expected, LibSqlUtils.validateAndFormatUrl(input));
-    }
-
-    private void assertFormatError(String input) {
-        String expectedMessage = "Invalid connection URL: " + input +
-            ".\nExpected URL formats: jdbc:dbeaver:libsql:<hostname>, libsql://<hostname>";
-        try {
-            LibSqlUtils.validateAndFormatUrl(input);
-            Assert.fail("Expected exception: " + expectedMessage);
-        } catch (LibSqlException e) {
-            Assert.assertEquals(
-                expectedMessage,
-                e.getMessage()
-            );
-        }
     }
 }

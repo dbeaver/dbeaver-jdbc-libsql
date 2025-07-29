@@ -16,6 +16,8 @@
  */
 package com.dbeaver.jdbc.driver.libsql;
 
+import org.jkiss.code.NotNull;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -68,7 +70,8 @@ public class LibSqlUtils {
         }
     }
 
-    public static String validateAndFormatUrl(String url) throws LibSqlException {
+    @NotNull
+    public static String validateAndFormatUrl(@NotNull String url) throws LibSqlException {
         Matcher matcher = LibSqlConstants.CONNECTION_URL_PATTERN.matcher(url);
         if (!matcher.matches()) {
             throw new LibSqlException(
