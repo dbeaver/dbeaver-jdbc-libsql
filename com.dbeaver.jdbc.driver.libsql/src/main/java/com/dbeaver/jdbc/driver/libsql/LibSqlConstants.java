@@ -20,10 +20,8 @@ import java.util.regex.Pattern;
 
 public class LibSqlConstants {
 
-    public static final String CONNECTION_URL_EXAMPLES = "jdbc:dbeaver:libsql:<hostname>, libsql://<hostname>";
-    public static final String CONNECTION_PROTOCOLS_REGEXP = "jdbc:dbeaver:libsql:(https://)?(libsql://)?|libsql://";
-    public static final Pattern CONNECTION_URL_PATTERN =
-        Pattern.compile("(" + CONNECTION_PROTOCOLS_REGEXP + ")[a-z0-9.-]+");
+    public static final Pattern CONNECTION_URL_EXAMPLE = Pattern.compile("jdbc:dbeaver:libsql:<server-url>");
+    public static final Pattern CONNECTION_URL_PATTERN = Pattern.compile("jdbc:dbeaver:libsql:(.+)");
 
     public static final int DRIVER_VERSION_MAJOR = 1;
     public static final int DRIVER_VERSION_MINOR = 0;
