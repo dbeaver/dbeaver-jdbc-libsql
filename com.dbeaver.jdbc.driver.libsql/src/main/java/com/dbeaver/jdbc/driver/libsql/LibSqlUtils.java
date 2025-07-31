@@ -1,6 +1,6 @@
 /*
  * DBeaver - Universal Database Manager
- * Copyright (C) 2010-2024 DBeaver Corp and others
+ * Copyright (C) 2010-2025 DBeaver Corp and others
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
  */
 package com.dbeaver.jdbc.driver.libsql;
 
+import org.jkiss.code.NotNull;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.regex.Matcher;
 
 public class LibSqlUtils {
 
@@ -65,5 +68,24 @@ public class LibSqlUtils {
         try (Statement stat = connection.createStatement()) {
             return stat.executeQuery(query);
         }
+    }
+
+    @NotNull
+    public static String validateAndFormatUrl(@NotNull String url) throws LibSqlException {
+        Matcher matcher = LibSqlConstants.CONNECTION_URL_PATTERN.matcher(url);
+        if (!matcher.matches()) {
+            throw new LibSqlException(
+                "Invalid connection URL: " + url +
+                    ".\nExpected URL formats: " + LibSqlConstants.CONNECTION_URL_EXAMPLES
+            );
+        }
+
+        if (url.startsWith("jdbc:dbeaver:libsql:")) {
+            url = url.replaceFirst("jdbc:dbeaver:libsql:", "");
+        }
+        if (url.startsWith("libsql://")) {
+            url = url.replaceFirst("libsql://", "https://");
+        }
+        return url;
     }
 }
