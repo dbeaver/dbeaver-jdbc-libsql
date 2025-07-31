@@ -80,12 +80,13 @@ public class LibSqlUtils {
             );
         }
 
-        if (url.startsWith("jdbc:dbeaver:libsql:")) {
-            url = url.replaceFirst("jdbc:dbeaver:libsql:", "");
+        String formattedUrl = url;
+        if (formattedUrl.startsWith("jdbc:dbeaver:libsql:")) {
+            formattedUrl = formattedUrl.replaceFirst("jdbc:dbeaver:libsql:", "");
         }
-        if (url.startsWith("libsql://")) {
-            url = url.replaceFirst("libsql://", "https://");
+        if (formattedUrl.startsWith("libsql://")) {
+            formattedUrl = formattedUrl.replaceFirst("libsql://", "https://");
         }
-        return url;
+        return formattedUrl;
     }
 }
