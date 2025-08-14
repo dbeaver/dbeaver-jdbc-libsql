@@ -1,32 +1,32 @@
 /*
  * DBeaver - Universal Database Manager
- * Copyright (C) 2010-2024 DBeaver Corp and others
+ * Copyright (C) 2010-2025 DBeaver Corp
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * All Rights Reserved.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * NOTICE:  All information contained herein is, and remains
+ * the property of DBeaver Corp and its suppliers, if any.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to DBeaver Corp and its suppliers
+ * and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from DBeaver Corp.
  */
 package com.dbeaver.jdbc.driver.libsql.client;
 
 import com.dbeaver.jdbc.driver.libsql.LibSqlConstants;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.Strictness;
-import com.google.gson.ToNumberPolicy;
+import com.google.gson.*;
 import com.google.gson.stream.JsonWriter;
 import org.jkiss.code.NotNull;
 import org.jkiss.code.Nullable;
 import org.jkiss.utils.CommonUtils;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -113,14 +113,19 @@ public class LibSqlClient {
             );
             try {
                 String responseBody = httpResponse.body();
-                try (Reader isr = new StringReader(responseBody)) {
+                try (StringReader isr = new StringReader(responseBody)) {
                     Response[] response;
                     if (responseBody.startsWith("[")) {
                         response = gson.fromJson(isr, Response[].class);
                     } else {
-                        response = new Response[] {
-                            gson.fromJson(isr, Response.class)
-                        };
+                        Response parsedResponse;
+                        try {
+                            parsedResponse = gson.fromJson(isr, Response.class);
+                        } catch (JsonSyntaxException e) {
+                            parsedResponse = new Response();
+                            parsedResponse.error = responseBody;
+                        }
+                        response = new Response[] { parsedResponse };
                     }
                     LibSqlExecutionResult[] resultSets = new LibSqlExecutionResult[response.length];
                     for (int i = 0; i < response.length; i++) {
