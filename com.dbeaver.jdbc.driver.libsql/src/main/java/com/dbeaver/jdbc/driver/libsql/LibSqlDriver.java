@@ -1,6 +1,6 @@
 /*
  * DBeaver - Universal Database Manager
- * Copyright (C) 2010-2024 DBeaver Corp and others
+ * Copyright (C) 2010-2025 DBeaver Corp and others
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 
 public class LibSqlDriver implements Driver {
 
@@ -42,13 +41,7 @@ public class LibSqlDriver implements Driver {
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
-        Matcher matcher = LibSqlConstants.CONNECTION_URL_PATTERN.matcher(url);
-        if (!matcher.matches()) {
-            throw new LibSqlException(
-                "Invalid connection URL: " + url +
-                ".\nExpected URL format: " + LibSqlConstants.CONNECTION_URL_EXAMPLE);
-        }
-        String targetUrl = matcher.group(1);
+        String targetUrl = LibSqlUtils.validateAndFormatUrl(url);
 
         Map<String, Object> props = new LinkedHashMap<>();
         for (Enumeration<?> pne = info.propertyNames(); pne.hasMoreElements(); ) {
