@@ -6,7 +6,7 @@
 
 Turso LibSQL [JDBC](https://en.wikipedia.org/wiki/JDBC_driver) is a library for accessing and managing [LibSQL](https://github.com/tursodatabase/libsql) databases in Java.
 - It is a pure Java library
-- Version 1.0 uses simple [HTTP API](https://github.com/tursodatabase/libsql/blob/main/docs/http_api.md) protocol for LibSQL
+- Version 1.0.x uses simple [HTTP API](https://github.com/tursodatabase/libsql/blob/main/docs/http_api.md) protocol for LibSQL
 - It supports prepared statements, database metadata, resultsets, data types and most of other JDBC features
 - It supports Turso and local LibSQL servers
 - It is included in [DBeaver](https://github.com/dbeaver/dbeaver) and [CloudBeaver](https://github.com/dbeaver/cloudbeaver) as default LibSQL driver. However, it can be used in any other products/frameworks which rely on JDBC API
@@ -18,10 +18,14 @@ Turso LibSQL [JDBC](https://en.wikipedia.org/wiki/JDBC_driver) is a library for 
 
 ## Usage
 
-JDBC URL format: `jdbc:dbeaver:libsql:<server-url>`  
+JDBC URL format: 
+- `jdbc:dbeaver:libsql:<server-url>` - classic JDBC form
+- `libsql://<server-host>` - Turso format
+
 Server URL is a full URL including schema and port. For example:
 - `jdbc:dbeaver:libsql:http://localhost:1234`
 - `jdbc:dbeaver:libsql:https://test-test.turso.io`
+- `libsql://test-test.turso.io`
 
 Token based authentication supported in version 1.0. Pass token value as password, leave the username empty.  
 
@@ -63,7 +67,7 @@ Download from Maven Central or from the releases page.
     <dependency>
       <groupId>com.dbeaver.jdbc</groupId>
       <artifactId>com.dbeaver.jdbc.driver.libsql</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.4</version>
     </dependency>
 </dependencies>
 ```
