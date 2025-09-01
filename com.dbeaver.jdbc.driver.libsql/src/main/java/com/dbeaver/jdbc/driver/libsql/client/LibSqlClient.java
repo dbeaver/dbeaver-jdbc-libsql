@@ -22,6 +22,7 @@ import com.google.gson.stream.JsonWriter;
 import org.jkiss.code.NotNull;
 import org.jkiss.code.Nullable;
 import org.jkiss.utils.CommonUtils;
+import org.jkiss.utils.HttpConstants;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -97,8 +98,8 @@ public class LibSqlClient {
             final HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(url.toURI())
                 .version(HttpClient.Version.HTTP_1_1)
-                .header("Content-Type", "application/json")
-                .header("User-Agent", userAgent)
+                .header(HttpConstants.HEADER_CONTENT_TYPE, "application/json")
+                .header(HttpConstants.HEADER_USER_AGENT, userAgent)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBuffer.toString()));
             if (!CommonUtils.isEmpty(authToken)) {
                 builder.header("Authorization", "Bearer " + authToken);
@@ -162,7 +163,7 @@ public class LibSqlClient {
         }
         baseURL += endpoint;
         HttpURLConnection connection = (HttpURLConnection) new URL(baseURL).openConnection();
-        connection.setRequestProperty("User-Agent", userAgent);
+        connection.setRequestProperty(HttpConstants.HEADER_USER_AGENT, userAgent);
         return connection;
     }
 
