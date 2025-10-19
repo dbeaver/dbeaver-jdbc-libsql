@@ -30,6 +30,16 @@ public class LibSqlReaderInput {
         this.length = length;
     }
 
+  /** For testing purposes only */
+  public long getLength() {
+    return length;
+  }
+
+  /** For testing purposes only */
+  public Reader getStream() {
+    return stream;
+  }
+
     @Override
     public String toString() {
         try {

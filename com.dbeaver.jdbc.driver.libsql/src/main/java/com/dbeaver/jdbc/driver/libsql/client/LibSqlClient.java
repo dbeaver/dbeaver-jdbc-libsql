@@ -72,9 +72,34 @@ public class LibSqlClient {
         this.client = builder.build();
     }
 
+  /** For testing purposes only */
+  public String getAuthToken() {
+    return authToken;
+  }
+
+  /** For testing purposes only */
+  public HttpClient getClient() {
+    return client;
+  }
+
+  /** For testing purposes only */
+  public ExecutorService getClientExecutor() {
+    return clientExecutor;
+  }
+
+  /** For testing purposes only */
+  public URL getUrl() {
+    return url;
+  }
+
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
+
+  /** For testing purposes only */
+  public String getUserAgent() {
+    return userAgent;
+  }
 
     /**
      * Execute a single SQL statement.
