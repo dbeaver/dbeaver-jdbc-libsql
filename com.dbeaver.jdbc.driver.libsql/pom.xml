@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.dbeaver.jdbc</groupId>
         <artifactId>jdbc-libsql</artifactId>
-        <version>1.0.5-SNAPSHOT</version>
+        <version>1.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>com.dbeaver.jdbc.driver.libsql</artifactId>
