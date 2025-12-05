@@ -13,5 +13,6 @@
   <modules>
     <!-- dbeaver common -->
     <module>../../dbeaver-common</module>
+    <module>../</module>
   </modules>
 </project>
