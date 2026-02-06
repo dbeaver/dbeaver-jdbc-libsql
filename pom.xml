@@ -76,6 +76,7 @@
                     <useProjectSettings>false</useProjectSettings>
                     <source>${java.version.min}</source>
                     <target>${java.version.min}</target>
+                    <compilerId>${tycho.compiler.id}</compilerId>
                     <compilerVersion>${java.version.min}</compilerVersion>
                 </configuration>
             </plugin>
