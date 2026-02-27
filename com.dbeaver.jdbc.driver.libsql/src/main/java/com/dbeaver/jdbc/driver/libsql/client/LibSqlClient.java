@@ -1,6 +1,6 @@
 /*
  * DBeaver - Universal Database Manager
- * Copyright (C) 2010-2025 DBeaver Corp
+ * Copyright (C) 2010-2026 DBeaver Corp
  *
  * All Rights Reserved.
  *
@@ -98,11 +98,11 @@ public class LibSqlClient {
             final HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(url.toURI())
                 .version(HttpClient.Version.HTTP_1_1)
-                .header(HttpConstants.HEADER_CONTENT_TYPE, "application/json")
+                .header(HttpConstants.HEADER_CONTENT_TYPE, HttpConstants.CONTENT_TYPE_JSON)
                 .header(HttpConstants.HEADER_USER_AGENT, userAgent)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBuffer.toString()));
             if (!CommonUtils.isEmpty(authToken)) {
-                builder.header("Authorization", "Bearer " + authToken);
+                builder.header(HttpConstants.HEADER_AUTHORIZATION, "Bearer " + authToken);
             }
 
             HttpResponse.BodyHandler<String> readerBodyHandler =
