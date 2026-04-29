@@ -35,6 +35,14 @@ public class LibSqlDriverTest {
                 System.out.println("Driver: " + metaData.getDriverName());
                 System.out.println("Database: " + metaData.getDatabaseProductName() + " " + metaData.getDatabaseProductVersion());
 
+                System.out.println("isValid(5) = " + connection.isValid(5));
+                try {
+                    connection.isValid(-1);
+                    System.out.println("BUG: negative timeout did not throw");
+                } catch (SQLException e) {
+                    System.out.println("isValid(-1) correctly threw: " + e.getMessage());
+                }
+
                 System.out.println("Query:");
                 try (Statement dbStat = connection.createStatement()) {
                     try (ResultSet dbResult = dbStat.executeQuery("select * from testme")) {
@@ -61,6 +69,8 @@ public class LibSqlDriverTest {
                     }
                 }
 
+                connection.close();
+                System.out.println("isValid(5) after close = " + connection.isValid(5));
             }
         } finally {
             System.out.println("Finished (" + (System.currentTimeMillis() - startTime) + "ms)");

@@ -28,6 +28,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class LibSqlConnection extends AbstractJdbcConnection {
 
@@ -40,6 +44,7 @@ public class LibSqlConnection extends AbstractJdbcConnection {
     @NotNull
     private final Map<String, Object> driverProperties;
     private LibSqlDatabaseMetaData databaseMetaData;
+    private volatile boolean closed = false;
 
     public LibSqlConnection(
         @NotNull LibSqlDriver driver,
@@ -108,12 +113,47 @@ public class LibSqlConnection extends AbstractJdbcConnection {
 
     @Override
     public void close() throws SQLException {
-        client.close();
+        if (!closed) {
+            client.close();
+            closed = true;
+        }
     }
 
     @Override
     public boolean isClosed() {
-        return false;
+        return closed;
+    }
+
+    @Override
+    public boolean isValid(int timeout) throws SQLException {
+        if (timeout < 0) {
+            throw new SQLException("Invalid timeout value: " + timeout);
+        }
+        if (closed) {
+            return false;
+        }
+        CompletableFuture<Boolean> ping = CompletableFuture.supplyAsync(() -> {
+            try {
+                LibSqlUtils.executeQuery(this, "SELECT 1");
+                return Boolean.TRUE;
+            } catch (Exception e) {
+                return Boolean.FALSE;
+            }
+        });
+        try {
+            if (timeout == 0) {
+                return ping.get();
+            }
+            return ping.get(timeout, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            ping.cancel(true);
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (ExecutionException e) {
+            return false;
+        }
     }
 
     @Override
