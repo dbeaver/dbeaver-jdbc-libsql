@@ -52,7 +52,11 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
                 serverVersion = IOUtils.readLine(is);
             }
         } catch (IOException e) {
-            throw new SQLException(e);
+            // Some libSQL providers (e.g. Turso's managed service) don't
+            // expose a /version endpoint. Fall back to a static product
+            // name so JDBC clients can still classify the database as
+            // SQLite-compatible and pick a sensible dialect.
+            serverVersion = "SQLite";
         }
     }
 
