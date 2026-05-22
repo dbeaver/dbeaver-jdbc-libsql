@@ -164,6 +164,9 @@ public class LibSqlClient {
         baseURL += endpoint;
         HttpURLConnection connection = (HttpURLConnection) new URL(baseURL).openConnection();
         connection.setRequestProperty(HttpConstants.HEADER_USER_AGENT, userAgent);
+        if (!CommonUtils.isEmpty(authToken)) {
+            connection.setRequestProperty(HttpConstants.HEADER_AUTHORIZATION, "Bearer " + authToken);
+        }
         return connection;
     }
 
