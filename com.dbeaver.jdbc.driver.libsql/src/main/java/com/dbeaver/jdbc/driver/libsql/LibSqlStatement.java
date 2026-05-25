@@ -121,7 +121,10 @@ public class LibSqlStatement extends AbstractJdbcStatement<LibSqlConnection> {
     @Override
     public int getUpdateCount() throws SQLException {
         if (executionResult == null) {
-            throw new LibSqlException("No update count before statement execute");
+            return -1;
+        }
+        if (executionResult.getColumns() != null && !executionResult.getColumns().isEmpty()) {
+            return -1;
         }
         return (int) executionResult.getUpdateCount();
     }
@@ -129,13 +132,18 @@ public class LibSqlStatement extends AbstractJdbcStatement<LibSqlConnection> {
     @Override
     public long getLargeUpdateCount() throws SQLException {
         if (executionResult == null) {
-            throw new LibSqlException("No update count before statement execute");
+            return -1;
+        }
+        if (executionResult.getColumns() != null && !executionResult.getColumns().isEmpty()) {
+            return -1;
         }
         return executionResult.getUpdateCount();
     }
 
     @Override
     public boolean getMoreResults() throws SQLException {
+        executionResult = null;
+        resultSet = null;
         return false;
     }
 
@@ -151,6 +159,8 @@ public class LibSqlStatement extends AbstractJdbcStatement<LibSqlConnection> {
 
     @Override
     public boolean getMoreResults(int current) throws SQLException {
+        executionResult = null;
+        resultSet = null;
         return false;
     }
     @Override
