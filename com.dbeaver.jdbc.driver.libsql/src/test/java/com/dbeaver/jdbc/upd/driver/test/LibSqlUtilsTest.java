@@ -18,18 +18,18 @@ package com.dbeaver.jdbc.upd.driver.test;
 
 import com.dbeaver.jdbc.driver.libsql.LibSqlException;
 import com.dbeaver.jdbc.driver.libsql.LibSqlUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class LibSqlUtilsTest {
 
     @Test
     public void testFormatUrl() throws LibSqlException {
-        Assert.assertThrows(
+        Assertions.assertThrows(
             LibSqlException.class,
             () -> LibSqlUtils.validateAndFormatUrl("localhost")
         );
-        Assert.assertThrows(
+        Assertions.assertThrows(
             LibSqlException.class,
             () -> LibSqlUtils.validateAndFormatUrl("http://localhost")
         );
@@ -43,6 +43,6 @@ public class LibSqlUtilsTest {
     }
 
     private void assertUrlFormat(String input, String expected) throws LibSqlException {
-        Assert.assertEquals(expected, LibSqlUtils.validateAndFormatUrl(input));
+        Assertions.assertEquals(expected, LibSqlUtils.validateAndFormatUrl(input));
     }
 }
