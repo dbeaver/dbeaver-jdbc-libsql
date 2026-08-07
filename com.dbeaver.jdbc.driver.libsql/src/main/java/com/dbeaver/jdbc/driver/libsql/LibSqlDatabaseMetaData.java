@@ -1,18 +1,18 @@
 /*
  * DBeaver - Universal Database Manager
- * Copyright (C) 2010-2024 DBeaver Corp and others
+ * Copyright (C) 2010-2026 DBeaver Corp
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * All Rights Reserved.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * NOTICE:  All information contained herein is, and remains
+ * the property of DBeaver Corp and its suppliers, if any.
+ * The intellectual and technical concepts contained
+ * herein are proprietary to DBeaver Corp and its suppliers
+ * and may be covered by U.S. and Foreign Patents,
+ * patents in process, and are protected by trade secret or copyright law.
+ * Dissemination of this information or reproduction of this material
+ * is strictly forbidden unless prior written permission is obtained
+ * from DBeaver Corp.
  */
 package com.dbeaver.jdbc.driver.libsql;
 
@@ -103,7 +103,7 @@ public class LibSqlDatabaseMetaData extends AbstractJdbcDatabaseMetaData<LibSqlC
             "SELECT NULL as TABLE_CAT, NULL AS TABLE_SCHEM," +
                 "name AS TABLE_NAME,type as TABLE_TYPE, " +
                 "NULL AS REMARKS, NULL AS TYPE_CAT, NULL AS TYPE_SCHEM, NULL AS TYPE_NAME " +
-                "FROM sqlite_master WHERE type='table'")
+                "FROM sqlite_master WHERE type IN ('table', 'view')")
         ) {
             return dbStat.executeQuery();
         }
