@@ -50,7 +50,7 @@ public class LibSqlUtils {
     }
 
     public static String escape(final String val) {
-        if (val.indexOf('\'') == 1) {
+        if (val.indexOf('\'') == -1) {
             return val;
         }
         int len = val.length();
