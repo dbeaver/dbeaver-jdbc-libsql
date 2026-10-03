@@ -97,7 +97,13 @@ public class LibSqlResultSet extends AbstractJdbcResultSet<LibSqlStatement, LibS
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
-        return CommonUtils.toBoolean(getObject(columnIndex));
+        Object value = getObject(columnIndex);
+
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue() != 0;
+        }
+
+        return CommonUtils.toBoolean(value);
     }
 
     @Override
@@ -184,9 +190,14 @@ public class LibSqlResultSet extends AbstractJdbcResultSet<LibSqlStatement, LibS
 
     @Override
     public boolean getBoolean(String columnLabel) throws SQLException {
-        return CommonUtils.toBoolean(getObject(columnLabel));
-    }
+        Object value = getObject(columnLabel);
 
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue() != 0;
+        }
+
+        return CommonUtils.toBoolean(value);
+    }
     @Override
     public byte getByte(String columnLabel) throws SQLException {
         return (byte) CommonUtils.toInt(getObject(columnLabel));
