@@ -45,4 +45,23 @@ public class LibSqlUtilsTest {
     private void assertUrlFormat(String input, String expected) throws LibSqlException {
         Assertions.assertEquals(expected, LibSqlUtils.validateAndFormatUrl(input));
     }
+
+    @Test
+    public void testEscape() {
+        // No quote: returned unchanged.
+        Assertions.assertEquals("table", LibSqlUtils.escape("table"));
+        Assertions.assertEquals("", LibSqlUtils.escape(""));
+
+        // Every single quote must be doubled, wherever it sits.
+        Assertions.assertEquals("''", LibSqlUtils.escape("'"));
+        Assertions.assertEquals("a''b", LibSqlUtils.escape("a'b"));
+        Assertions.assertEquals("''ab", LibSqlUtils.escape("'ab"));
+        Assertions.assertEquals("ab''", LibSqlUtils.escape("ab'"));
+
+        // Regression: a quote at index 1 used to be returned un-escaped
+        // (guard was `== 1` instead of `== -1`), letting the quote close the
+        // surrounding SQL string literal in concatenated metadata queries.
+        Assertions.assertEquals("x''", LibSqlUtils.escape("x'"));
+        Assertions.assertEquals("x'' OR ''1''=''1", LibSqlUtils.escape("x' OR '1'='1"));
+    }
 }
