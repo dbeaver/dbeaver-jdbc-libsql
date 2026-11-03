@@ -1,6 +1,6 @@
 /*
  * DBeaver - Universal Database Manager
- * Copyright (C) 2010-2025 DBeaver Corp and others
+ * Copyright (C) 2010-2026 DBeaver Corp and others
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ public class LibSqlConstants {
 
     public static final String CONNECTION_URL_EXAMPLES = "jdbc:dbeaver:libsql:<server-url>, libsql://";
     public static final Pattern CONNECTION_URL_PATTERN = Pattern.compile("(jdbc:dbeaver:libsql:|libsql://)(.+)");
+
+    public static final String PROP_DATABASE_NAME = "db_name";
+    public static final String HEADER_NAMESPACE = "x-namespace-bin";
 
     public static final int DRIVER_VERSION_MAJOR = 1;
     public static final int DRIVER_VERSION_MINOR = 0;

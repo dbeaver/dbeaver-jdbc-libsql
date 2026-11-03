@@ -36,6 +36,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -54,6 +55,8 @@ public class LibSqlClient {
 
     private final URL url;
     private final String authToken;
+    @Nullable
+    private final String namespaceHeader;
     private final ExecutorService clientExecutor;
     private String userAgent = LibSqlConstants.DRIVER_INFO + " " +
         LibSqlConstants.DRIVER_VERSION_MAJOR +
@@ -61,9 +64,16 @@ public class LibSqlClient {
         "." + LibSqlConstants.DRIVER_VERSION_MICRO;
     private final HttpClient client;
 
-    public LibSqlClient(URL url, String authToken) {
+    public LibSqlClient(@NotNull URL url, @Nullable String authToken) {
+        this(url, authToken, null);
+    }
+
+    public LibSqlClient(@NotNull URL url, @Nullable String authToken, @Nullable String databaseName) {
         this.url = url;
         this.authToken = authToken;
+        // sqld expects UTF-8 namespace bytes in unpadded standard Base64 metadata.
+        this.namespaceHeader = CommonUtils.isEmpty(databaseName) ? null
+            : Base64.getEncoder().withoutPadding().encodeToString(databaseName.getBytes(StandardCharsets.UTF_8));
 
         this.clientExecutor = Executors.newSingleThreadExecutor();
         HttpClient.Builder builder = HttpClient.newBuilder()
@@ -88,6 +98,7 @@ public class LibSqlClient {
     /**
      * Execute a batch of SQL statements.
      */
+    @NotNull
     public LibSqlExecutionResult[] executeBatch(
         @NotNull String[] stmts,
         @Nullable Map<Object, Object>[] parameters) throws SQLException {
@@ -103,6 +114,9 @@ public class LibSqlClient {
                 .POST(HttpRequest.BodyPublishers.ofString(requestBuffer.toString()));
             if (!CommonUtils.isEmpty(authToken)) {
                 builder.header(HttpConstants.HEADER_AUTHORIZATION, "Bearer " + authToken);
+            }
+            if (namespaceHeader != null) {
+                builder.header(LibSqlConstants.HEADER_NAMESPACE, namespaceHeader);
             }
 
             HttpResponse.BodyHandler<String> readerBodyHandler =
@@ -156,7 +170,8 @@ public class LibSqlClient {
 
     }
 
-    public HttpURLConnection openSimpleConnection(String endpoint) throws IOException {
+    @NotNull
+    public HttpURLConnection openSimpleConnection(@NotNull String endpoint) throws IOException {
         String baseURL = url.toString();
         if (!baseURL.endsWith("/")) {
             baseURL += "/";
@@ -166,6 +181,9 @@ public class LibSqlClient {
         connection.setRequestProperty(HttpConstants.HEADER_USER_AGENT, userAgent);
         if (!CommonUtils.isEmpty(authToken)) {
             connection.setRequestProperty(HttpConstants.HEADER_AUTHORIZATION, "Bearer " + authToken);
+        }
+        if (namespaceHeader != null) {
+            connection.setRequestProperty(LibSqlConstants.HEADER_NAMESPACE, namespaceHeader);
         }
         return connection;
     }

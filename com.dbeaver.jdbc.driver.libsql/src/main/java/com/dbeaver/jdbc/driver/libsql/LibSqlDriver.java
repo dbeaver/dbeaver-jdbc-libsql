@@ -1,6 +1,6 @@
 /*
  * DBeaver - Universal Database Manager
- * Copyright (C) 2010-2025 DBeaver Corp and others
+ * Copyright (C) 2010-2026 DBeaver Corp and others
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
  */
 package com.dbeaver.jdbc.driver.libsql;
 
+import org.jkiss.code.NotNull;
+import org.jkiss.code.Nullable;
 
 import java.sql.*;
 import java.util.Enumeration;
@@ -40,14 +42,14 @@ public class LibSqlDriver implements Driver {
     private static final java.util.logging.Logger parentLogger;
 
     @Override
-    public Connection connect(String url, Properties info) throws SQLException {
-        String targetUrl = LibSqlUtils.validateAndFormatUrl(url);
-
+    @NotNull
+    public Connection connect(@NotNull String url, @NotNull Properties info) throws SQLException {
         Map<String, Object> props = new LinkedHashMap<>();
         for (Enumeration<?> pne = info.propertyNames(); pne.hasMoreElements(); ) {
             String propName = (String) pne.nextElement();
-            props.put(propName, info.get(propName));
+            props.put(propName, info.getOrDefault(propName, info.getProperty(propName)));
         }
+        String targetUrl = LibSqlUtils.parseUrlProperties(url, props);
         return new LibSqlConnection(this, targetUrl, props);
     }
 
@@ -57,10 +59,20 @@ public class LibSqlDriver implements Driver {
     }
 
     @Override
-    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) {
-        return new DriverPropertyInfo[] {
-
-        };
+    @NotNull
+    public DriverPropertyInfo[] getPropertyInfo(@Nullable String url, @NotNull Properties info) throws SQLException {
+        Map<String, Object> props = new LinkedHashMap<>();
+        String databaseName = info.getProperty(LibSqlConstants.PROP_DATABASE_NAME);
+        if (databaseName != null) {
+            props.put(LibSqlConstants.PROP_DATABASE_NAME, databaseName);
+        }
+        if (url != null && !url.isEmpty()) {
+            LibSqlUtils.parseUrlProperties(url, props);
+        }
+        DriverPropertyInfo database = new DriverPropertyInfo(
+            LibSqlConstants.PROP_DATABASE_NAME, (String) props.get(LibSqlConstants.PROP_DATABASE_NAME));
+        database.description = "Database namespace (optional; leave empty to use the server default)";
+        return new DriverPropertyInfo[] { database };
     }
 
     @Override
