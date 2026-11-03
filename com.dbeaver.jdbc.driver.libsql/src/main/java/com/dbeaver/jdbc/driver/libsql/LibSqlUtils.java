@@ -1,6 +1,6 @@
 /*
  * DBeaver - Universal Database Manager
- * Copyright (C) 2010-2025 DBeaver Corp and others
+ * Copyright (C) 2010-2026 DBeaver Corp and others
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,16 @@ package com.dbeaver.jdbc.driver.libsql;
 
 import org.jkiss.code.NotNull;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 
 public class LibSqlUtils {
@@ -88,5 +94,41 @@ public class LibSqlUtils {
             formattedUrl = formattedUrl.replaceFirst("libsql://", "https://");
         }
         return formattedUrl;
+    }
+
+    /**
+     * Extract JDBC-only URL properties without forwarding them to the HTTP server.
+     * Explicit connection properties take precedence over URL values.
+     */
+    @NotNull
+    static String parseUrlProperties(@NotNull String url, @NotNull Map<String, Object> properties) throws LibSqlException {
+        String targetUrl = validateAndFormatUrl(url);
+        try {
+            URI uri = new URI(targetUrl);
+            String query = uri.getRawQuery();
+            if (query == null) {
+                return targetUrl;
+            }
+            StringJoiner remaining = new StringJoiner("&");
+            boolean found = false;
+            for (String parameter : query.split("&", -1)) {
+                String[] parts = parameter.split("=", 2);
+                if (LibSqlConstants.PROP_DATABASE_NAME.equals(URLDecoder.decode(parts[0], StandardCharsets.UTF_8))) {
+                    String value = parts.length == 2 ? URLDecoder.decode(parts[1], StandardCharsets.UTF_8) : "";
+                    properties.putIfAbsent(LibSqlConstants.PROP_DATABASE_NAME, value);
+                    found = true;
+                } else {
+                    remaining.add(parameter);
+                }
+            }
+            if (!found) {
+                return targetUrl;
+            }
+            return targetUrl.substring(0, targetUrl.indexOf('?'))
+                + (remaining.length() == 0 ? "" : "?" + remaining)
+                + (uri.getRawFragment() == null ? "" : "#" + uri.getRawFragment());
+        } catch (URISyntaxException | IllegalArgumentException e) {
+            throw new LibSqlException("Invalid connection URL", e);
+        }
     }
 }
