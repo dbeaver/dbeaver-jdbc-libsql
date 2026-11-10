@@ -17,11 +17,10 @@
 package com.dbeaver.jdbc.driver.libsql;
 
 import org.jkiss.code.NotNull;
+import org.jkiss.utils.HttpUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -111,11 +110,11 @@ public class LibSqlUtils {
             }
             StringJoiner remaining = new StringJoiner("&");
             boolean found = false;
+            // Parse separately to preserve repeated parameters and raw encoding in the forwarded URL.
             for (String parameter : query.split("&", -1)) {
-                String[] parts = parameter.split("=", 2);
-                if (LibSqlConstants.PROP_DATABASE_NAME.equals(URLDecoder.decode(parts[0], StandardCharsets.UTF_8))) {
-                    String value = parts.length == 2 ? URLDecoder.decode(parts[1], StandardCharsets.UTF_8) : "";
-                    properties.putIfAbsent(LibSqlConstants.PROP_DATABASE_NAME, value);
+                Map<String, String> parameters = HttpUtils.parseQuery(parameter);
+                if (parameters.containsKey(LibSqlConstants.PROP_DATABASE_NAME)) {
+                    properties.putIfAbsent(LibSqlConstants.PROP_DATABASE_NAME, parameters.get(LibSqlConstants.PROP_DATABASE_NAME));
                     found = true;
                 } else {
                     remaining.add(parameter);

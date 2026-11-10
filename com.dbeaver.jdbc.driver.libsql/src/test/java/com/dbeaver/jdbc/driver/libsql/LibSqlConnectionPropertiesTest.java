@@ -36,6 +36,25 @@ public class LibSqlConnectionPropertiesTest {
     }
 
     @Test
+    public void preservesRepeatedAndRawParametersWhenExtractingEncodedNamespace() throws Exception {
+        Map<String, Object> properties = new HashMap<>();
+        Assertions.assertEquals(
+            "https://server.example/?option=a%2bb&option=two+words&flag&&encoded%3Dname=a=b#fragment",
+            LibSqlUtils.parseUrlProperties(
+                "libsql://server.example/?option=a%2bb&db%5Fname=tenant+%E2%82%AC%3Done"
+                    + "&option=two+words&flag&&encoded%3Dname=a=b#fragment", properties));
+        Assertions.assertEquals("tenant €=one", properties.get("db_name"));
+    }
+
+    @Test
+    public void firstNamespaceValueTakesPrecedenceOverRepeatedUrlValues() throws Exception {
+        Map<String, Object> properties = new HashMap<>();
+        Assertions.assertEquals("https://server.example", LibSqlUtils.parseUrlProperties(
+            "libsql://server.example?db_name=first&db%5Fname=second", properties));
+        Assertions.assertEquals("first", properties.get("db_name"));
+    }
+
+    @Test
     public void removesJdbcOnlyQueryWhenItIsTheOnlyParameter() throws Exception {
         Map<String, Object> properties = new HashMap<>();
         Assertions.assertEquals("http://localhost:8080", LibSqlUtils.parseUrlProperties(
