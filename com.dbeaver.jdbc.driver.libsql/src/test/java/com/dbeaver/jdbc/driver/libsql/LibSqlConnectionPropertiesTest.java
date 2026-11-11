@@ -26,32 +26,33 @@ import java.util.Properties;
 
 public class LibSqlConnectionPropertiesTest {
     @Test
-    public void extractsNamespaceWithoutChangingOtherUrlComponents() throws Exception {
+    public void extractsAllPropertiesWithoutChangingOtherUrlComponents() throws Exception {
         Map<String, Object> properties = new HashMap<>();
         Assertions.assertEquals(
-            "https://server.example:8443/proxy/?option=a%2Bb&empty=#fragment",
+            "https://server.example:8443/proxy/#fragment",
             LibSqlUtils.parseUrlProperties(
                 "libsql://server.example:8443/proxy/?option=a%2Bb&db_name=test%2Bdb&empty=#fragment", properties));
-        Assertions.assertEquals("test+db", properties.get("db_name"));
+        Assertions.assertEquals(Map.of("db_name", "test+db", "option", "a+b", "empty", ""), properties);
     }
 
     @Test
-    public void rebuildsQueryWithEncodedNamesAndValues() throws Exception {
+    public void decodesParameterNamesAndValuesIntoProperties() throws Exception {
         Map<String, Object> properties = new HashMap<>();
         Assertions.assertEquals(
-            "https://server.example/?option=a%2Bb&space=two+words&flag=&encoded%3Dname=a%3Db#fragment",
+            "https://server.example/#fragment",
             LibSqlUtils.parseUrlProperties(
                 "libsql://server.example/?option=a%2bb&db%5Fname=tenant+%E2%82%AC%3Done"
                     + "&space=two%20words&flag&encoded%3Dname=a=b#fragment", properties));
-        Assertions.assertEquals("tenant €=one", properties.get("db_name"));
+        Assertions.assertEquals(Map.of(
+            "db_name", "tenant €=one", "option", "a+b", "space", "two words", "flag", "", "encoded=name", "a=b"), properties);
     }
 
     @Test
     public void repeatedUrlParametersUseLastValueFromQueryParser() throws Exception {
         Map<String, Object> properties = new HashMap<>();
-        Assertions.assertEquals("https://server.example?option=last", LibSqlUtils.parseUrlProperties(
+        Assertions.assertEquals("https://server.example", LibSqlUtils.parseUrlProperties(
             "libsql://server.example?db_name=first&option=first&db%5Fname=second&option=last", properties));
-        Assertions.assertEquals("second", properties.get("db_name"));
+        Assertions.assertEquals(Map.of("db_name", "second", "option", "last"), properties);
     }
 
     @Test
@@ -63,8 +64,8 @@ public class LibSqlConnectionPropertiesTest {
     }
 
     @Test
-    public void preservesUrlsWithoutNamespace() throws Exception {
-        for (String suffix : new String[] {"", "/", "?option=a%2Bb&empty=", "#db_name=testdb"}) {
+    public void preservesUrlsWithoutQuery() throws Exception {
+        for (String suffix : new String[] {"", "/", "#db_name=testdb"}) {
             Map<String, Object> properties = new HashMap<>();
             Assertions.assertEquals("https://server.example" + suffix, LibSqlUtils.parseUrlProperties(
                 "libsql://server.example" + suffix, properties));
@@ -73,12 +74,22 @@ public class LibSqlConnectionPropertiesTest {
     }
 
     @Test
+    public void extractsQueryWithoutNamespace() throws Exception {
+        for (String query : new String[] {"", "option=a%2Bb&empty="}) {
+            Map<String, Object> properties = new HashMap<>();
+            Assertions.assertEquals("https://server.example/#fragment", LibSqlUtils.parseUrlProperties(
+                "libsql://server.example/?" + query + "#fragment", properties));
+            Assertions.assertEquals(query.isEmpty() ? Map.of() : Map.of("option", "a+b", "empty", ""), properties);
+        }
+    }
+
+    @Test
     public void explicitPropertiesOverrideAllUrlValuesIncludingWhenEmpty() throws Exception {
         for (String database : new String[] {"from-properties", ""}) {
-            Map<String, Object> properties = new HashMap<>(Map.of("db_name", database));
+            Map<String, Object> properties = new HashMap<>(Map.of("db_name", database, "password", "from-properties"));
             Assertions.assertEquals("https://server.example", LibSqlUtils.parseUrlProperties(
-                "libsql://server.example?db_name=first&db_name=second", properties));
-            Assertions.assertEquals(database, properties.get("db_name"));
+                "libsql://server.example?db_name=first&db_name=second&password=from-url&option=value", properties));
+            Assertions.assertEquals(Map.of("db_name", database, "password", "from-properties", "option", "value"), properties);
         }
     }
 

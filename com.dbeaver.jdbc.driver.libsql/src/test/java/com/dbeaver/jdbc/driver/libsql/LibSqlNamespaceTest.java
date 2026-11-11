@@ -97,10 +97,13 @@ public class LibSqlNamespaceTest {
     }
 
     @Test
-    public void urlNamespaceIsDecodedAndNotForwardedInQuery() throws Exception {
-        try (Connection connection = new LibSqlDriver().connect(jdbcUrl() + "?db_name=tenant%2Bone", new Properties())) {
+    public void urlPropertiesReachStatementsAndMetadataWithoutQuery() throws Exception {
+        try (Connection connection = new LibSqlDriver().connect(
+            jdbcUrl() + "?db_name=tenant%2Bone&password=url-token&option=value", new Properties())) {
             Assertions.assertFalse(connection.isClosed());
-            assertRequest("tenant+one", null, "/");
+            assertRequest("tenant+one", "Bearer url-token", "/");
+            Assertions.assertEquals("0.24.0", connection.getMetaData().getDatabaseProductVersion());
+            assertRequest("tenant+one", "Bearer url-token", "/version");
         }
     }
 

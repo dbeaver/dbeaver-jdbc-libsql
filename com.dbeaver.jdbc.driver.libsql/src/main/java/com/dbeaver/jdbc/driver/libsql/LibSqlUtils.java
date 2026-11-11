@@ -21,14 +21,11 @@ import org.jkiss.utils.HttpUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.regex.Matcher;
 
 public class LibSqlUtils {
@@ -98,7 +95,7 @@ public class LibSqlUtils {
     }
 
     /**
-     * Extract JDBC-only URL properties without forwarding them to the HTTP server.
+     * Extract connection properties from the URL without forwarding the query to the HTTP server.
      * Explicit connection properties take precedence over URL values.
      */
     @NotNull
@@ -110,19 +107,8 @@ public class LibSqlUtils {
             if (query == null) {
                 return targetUrl;
             }
-            Map<String, String> parameters = HttpUtils.parseQuery(query);
-            String databaseName = parameters.remove(LibSqlConstants.PROP_DATABASE_NAME);
-            if (databaseName == null) {
-                return targetUrl;
-            }
-            properties.putIfAbsent(LibSqlConstants.PROP_DATABASE_NAME, databaseName);
-            StringJoiner remaining = new StringJoiner("&");
-            for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-                remaining.add(URLEncoder.encode(parameter.getKey(), StandardCharsets.UTF_8)
-                    + "=" + URLEncoder.encode(parameter.getValue(), StandardCharsets.UTF_8));
-            }
+            HttpUtils.parseQuery(query).forEach(properties::putIfAbsent);
             return targetUrl.substring(0, targetUrl.indexOf('?'))
-                + (remaining.length() == 0 ? "" : "?" + remaining)
                 + (uri.getRawFragment() == null ? "" : "#" + uri.getRawFragment());
         } catch (URISyntaxException | IllegalArgumentException e) {
             throw new LibSqlException("Invalid connection URL", e);
