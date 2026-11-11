@@ -21,6 +21,8 @@ import org.jkiss.utils.HttpUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -108,20 +110,16 @@ public class LibSqlUtils {
             if (query == null) {
                 return targetUrl;
             }
-            StringJoiner remaining = new StringJoiner("&");
-            boolean found = false;
-            // Parse separately to preserve repeated parameters and raw encoding in the forwarded URL.
-            for (String parameter : query.split("&", -1)) {
-                Map<String, String> parameters = HttpUtils.parseQuery(parameter);
-                if (parameters.containsKey(LibSqlConstants.PROP_DATABASE_NAME)) {
-                    properties.putIfAbsent(LibSqlConstants.PROP_DATABASE_NAME, parameters.get(LibSqlConstants.PROP_DATABASE_NAME));
-                    found = true;
-                } else {
-                    remaining.add(parameter);
-                }
-            }
-            if (!found) {
+            Map<String, String> parameters = HttpUtils.parseQuery(query);
+            String databaseName = parameters.remove(LibSqlConstants.PROP_DATABASE_NAME);
+            if (databaseName == null) {
                 return targetUrl;
+            }
+            properties.putIfAbsent(LibSqlConstants.PROP_DATABASE_NAME, databaseName);
+            StringJoiner remaining = new StringJoiner("&");
+            for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+                remaining.add(URLEncoder.encode(parameter.getKey(), StandardCharsets.UTF_8)
+                    + "=" + URLEncoder.encode(parameter.getValue(), StandardCharsets.UTF_8));
             }
             return targetUrl.substring(0, targetUrl.indexOf('?'))
                 + (remaining.length() == 0 ? "" : "?" + remaining)

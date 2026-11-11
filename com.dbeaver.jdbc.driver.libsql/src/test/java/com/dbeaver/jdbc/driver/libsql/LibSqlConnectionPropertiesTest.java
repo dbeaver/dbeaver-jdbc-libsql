@@ -36,22 +36,22 @@ public class LibSqlConnectionPropertiesTest {
     }
 
     @Test
-    public void preservesRepeatedAndRawParametersWhenExtractingEncodedNamespace() throws Exception {
+    public void rebuildsQueryWithEncodedNamesAndValues() throws Exception {
         Map<String, Object> properties = new HashMap<>();
         Assertions.assertEquals(
-            "https://server.example/?option=a%2bb&option=two+words&flag&&encoded%3Dname=a=b#fragment",
+            "https://server.example/?option=a%2Bb&space=two+words&flag=&encoded%3Dname=a%3Db#fragment",
             LibSqlUtils.parseUrlProperties(
                 "libsql://server.example/?option=a%2bb&db%5Fname=tenant+%E2%82%AC%3Done"
-                    + "&option=two+words&flag&&encoded%3Dname=a=b#fragment", properties));
+                    + "&space=two%20words&flag&encoded%3Dname=a=b#fragment", properties));
         Assertions.assertEquals("tenant €=one", properties.get("db_name"));
     }
 
     @Test
-    public void firstNamespaceValueTakesPrecedenceOverRepeatedUrlValues() throws Exception {
+    public void repeatedUrlParametersUseLastValueFromQueryParser() throws Exception {
         Map<String, Object> properties = new HashMap<>();
-        Assertions.assertEquals("https://server.example", LibSqlUtils.parseUrlProperties(
-            "libsql://server.example?db_name=first&db%5Fname=second", properties));
-        Assertions.assertEquals("first", properties.get("db_name"));
+        Assertions.assertEquals("https://server.example?option=last", LibSqlUtils.parseUrlProperties(
+            "libsql://server.example?db_name=first&option=first&db%5Fname=second&option=last", properties));
+        Assertions.assertEquals("second", properties.get("db_name"));
     }
 
     @Test
