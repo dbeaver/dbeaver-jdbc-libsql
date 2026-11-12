@@ -16,6 +16,22 @@ Turso LibSQL [JDBC](https://en.wikipedia.org/wiki/JDBC_driver) is a library for 
 - Java 17
 - Maven
 
+## Building
+
+Clone `dbeaver-common` alongside this repository and run:
+
+```sh
+../dbeaver-common/mvnw -f aggregate/pom.xml package
+```
+
+The default build produces a plain driver JAR. To also build the standalone shaded JAR and `target/dist` distribution, run:
+
+```sh
+../dbeaver-common/mvnw -f aggregate/pom.xml package -Pfull-jar
+```
+
+On Windows, use `../dbeaver-common/mvnw.cmd`.
+
 ## Usage
 
 JDBC URL format: 
