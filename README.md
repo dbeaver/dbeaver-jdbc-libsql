@@ -47,6 +47,29 @@ Token based authentication supported in version 1.0. Pass token value as passwor
 
 Driver class name: `com.dbeaver.jdbc.driver.libsql.LibSqlDriver`
 
+### Database namespaces (multitenancy)
+
+For a standalone `sqld` server with namespaces enabled, select an existing database using the optional
+`db_name` connection property or URL parameter:
+
+```java
+Properties properties = new Properties();
+properties.setProperty("db_name", "testdb");
+properties.setProperty("password", token); // Omit for servers without authentication
+Connection connection = DriverManager.getConnection("jdbc:dbeaver:libsql:http://localhost:8080", properties);
+```
+
+Equivalent URL: `jdbc:dbeaver:libsql:http://localhost:8080?db_name=testdb`.
+The Turso URL form also accepts this parameter: `libsql://server.example?db_name=testdb`.
+URL-encode database names when passing them as URL parameters. An explicit connection property takes precedence
+over the URL parameter. The driver sends the UTF-8 database name as unpadded standard Base64 in the
+`x-namespace-bin` HTTP header (supported by stable and newer sqld releases), not as SQL schema selection.
+If `db_name` is omitted or empty, existing server-default/hostname-based routing is preserved.
+
+In DBeaver, enter the server URL and the optional **Database** name in the LibSQL connection settings.
+Leave Database empty when the database is already selected by the hostname (for example, a Turso Cloud URL).
+Namespaces must already exist; the driver does not create them.
+
 ## Example
 
 ```java

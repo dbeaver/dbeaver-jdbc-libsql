@@ -1,6 +1,6 @@
 /*
  * DBeaver - Universal Database Manager
- * Copyright (C) 2010-2025 DBeaver Corp and others
+ * Copyright (C) 2010-2026 DBeaver Corp and others
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,15 @@
 package com.dbeaver.jdbc.driver.libsql;
 
 import org.jkiss.code.NotNull;
+import org.jkiss.utils.HttpUtils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 public class LibSqlUtils {
@@ -88,5 +92,26 @@ public class LibSqlUtils {
             formattedUrl = formattedUrl.replaceFirst("libsql://", "https://");
         }
         return formattedUrl;
+    }
+
+    /**
+     * Extract connection properties from the URL without forwarding the query to the HTTP server.
+     * Explicit connection properties take precedence over URL values.
+     */
+    @NotNull
+    static String parseUrlProperties(@NotNull String url, @NotNull Map<String, Object> properties) throws LibSqlException {
+        String targetUrl = validateAndFormatUrl(url);
+        try {
+            URI uri = new URI(targetUrl);
+            String query = uri.getRawQuery();
+            if (query == null) {
+                return targetUrl;
+            }
+            HttpUtils.parseQuery(query).forEach(properties::putIfAbsent);
+            return targetUrl.substring(0, targetUrl.indexOf('?'))
+                + (uri.getRawFragment() == null ? "" : "#" + uri.getRawFragment());
+        } catch (URISyntaxException | IllegalArgumentException e) {
+            throw new LibSqlException("Invalid connection URL", e);
+        }
     }
 }
