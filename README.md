@@ -49,6 +49,9 @@ URL-encode database names when passing them as URL parameters. An explicit conne
 over the URL parameter. The driver sends the UTF-8 database name as unpadded standard Base64 in the
 `x-namespace-bin` HTTP header (supported by stable and newer sqld releases), not as SQL schema selection.
 If `db_name` is omitted or empty, existing server-default/hostname-based routing is preserved.
+Pass `db_name` as plain text, not Base64. Encoding is a transport requirement of sqld's
+[`try_namespace_from_metadata`](https://github.com/tursodatabase/libsql/blob/libsql-server-v0.24.32/libsql-server/src/http/user/db_factory.rs),
+which decodes the header using `BASE64_STANDARD_NO_PAD`; the driver handles it automatically.
 
 In DBeaver, enter the server URL and the optional **Database** name in the LibSQL connection settings.
 Leave Database empty when the database is already selected by the hostname (for example, a Turso Cloud URL).

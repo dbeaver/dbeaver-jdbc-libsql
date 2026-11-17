@@ -56,9 +56,7 @@ public class LibSqlConnection extends AbstractJdbcConnection {
         this.driverProperties = driverProperties;
 
         try {
-            String token = CommonUtils.toString(driverProperties.get("password"), null);
-            String databaseName = CommonUtils.toString(driverProperties.get(LibSqlConstants.PROP_DATABASE_NAME), null);
-            this.client = new LibSqlClient(new URL(url), token, databaseName);
+            this.client = LibSqlClient.fromProperties(new URL(url), driverProperties);
         } catch (IOException e) {
             throw new SQLException(e);
         }

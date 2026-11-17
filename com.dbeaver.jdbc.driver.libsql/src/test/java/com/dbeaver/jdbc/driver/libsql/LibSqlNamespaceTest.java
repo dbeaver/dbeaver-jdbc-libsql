@@ -33,6 +33,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -153,6 +155,34 @@ public class LibSqlNamespaceTest {
         try {
             client.execute("SELECT 1", null);
             assertRequest(null, null, "/");
+        } finally {
+            client.close();
+        }
+    }
+
+    @Test
+    public void clientPropertiesKeepPlainTextDatabaseNameAndSnapshotCredentials() throws Exception {
+        // Include UTF-8 bytes whose standard Base64 representation contains both '+' and '/'.
+        String databaseName = "tenant-数据库--\u083e\u083f";
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(LibSqlConstants.PROP_DATABASE_NAME, databaseName);
+        properties.put("password", "test-token");
+        LibSqlClient client = LibSqlClient.fromProperties(
+            URI.create(jdbcUrl().substring("jdbc:dbeaver:libsql:".length())).toURL(), properties);
+        try {
+            Assertions.assertEquals(databaseName, properties.get(LibSqlConstants.PROP_DATABASE_NAME));
+            properties.put(LibSqlConstants.PROP_DATABASE_NAME, "another-tenant");
+            properties.put("password", "another-token");
+            client.execute("SELECT 1", null);
+            Request request = assertRequest(databaseName, "Bearer test-token", "/");
+            Assertions.assertEquals("dGVuYW50LeaVsOaNruW6ky0t4KC+4KC/", request.namespace());
+            var connection = client.openSimpleConnection("version");
+            try (var input = connection.getInputStream()) {
+                input.readAllBytes();
+            } finally {
+                connection.disconnect();
+            }
+            assertRequest(databaseName, "Bearer test-token", "/version");
         } finally {
             client.close();
         }

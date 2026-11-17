@@ -56,13 +56,24 @@ public class LibSqlClient {
     private final URL url;
     private final String authToken;
     @Nullable
-    private final String namespaceHeader;
+    private final String databaseName;
     private final ExecutorService clientExecutor;
     private String userAgent = LibSqlConstants.DRIVER_INFO + " " +
         LibSqlConstants.DRIVER_VERSION_MAJOR +
         "." + LibSqlConstants.DRIVER_VERSION_MAJOR +
         "." + LibSqlConstants.DRIVER_VERSION_MICRO;
     private final HttpClient client;
+
+    /**
+     * Create a client from JDBC properties without making the legacy (url, null) constructor call ambiguous.
+     */
+    @NotNull
+    public static LibSqlClient fromProperties(@NotNull URL url, @NotNull Map<String, Object> properties) {
+        return new LibSqlClient(
+            url,
+            CommonUtils.toString(properties.get("password"), null),
+            CommonUtils.toString(properties.get(LibSqlConstants.PROP_DATABASE_NAME), null));
+    }
 
     public LibSqlClient(@NotNull URL url, @Nullable String authToken) {
         this(url, authToken, null);
@@ -71,9 +82,7 @@ public class LibSqlClient {
     public LibSqlClient(@NotNull URL url, @Nullable String authToken, @Nullable String databaseName) {
         this.url = url;
         this.authToken = authToken;
-        // sqld expects UTF-8 namespace bytes in unpadded standard Base64 metadata.
-        this.namespaceHeader = CommonUtils.isEmpty(databaseName) ? null
-            : Base64.getEncoder().withoutPadding().encodeToString(databaseName.getBytes(StandardCharsets.UTF_8));
+        this.databaseName = databaseName;
 
         this.clientExecutor = Executors.newSingleThreadExecutor();
         HttpClient.Builder builder = HttpClient.newBuilder()
@@ -115,8 +124,8 @@ public class LibSqlClient {
             if (!CommonUtils.isEmpty(authToken)) {
                 builder.header(HttpConstants.HEADER_AUTHORIZATION, "Bearer " + authToken);
             }
-            if (namespaceHeader != null) {
-                builder.header(LibSqlConstants.HEADER_NAMESPACE, namespaceHeader);
+            if (!CommonUtils.isEmpty(databaseName)) {
+                builder.header(LibSqlConstants.HEADER_NAMESPACE, encodeDatabaseName());
             }
 
             HttpResponse.BodyHandler<String> readerBodyHandler =
@@ -182,10 +191,17 @@ public class LibSqlClient {
         if (!CommonUtils.isEmpty(authToken)) {
             connection.setRequestProperty(HttpConstants.HEADER_AUTHORIZATION, "Bearer " + authToken);
         }
-        if (namespaceHeader != null) {
-            connection.setRequestProperty(LibSqlConstants.HEADER_NAMESPACE, namespaceHeader);
+        if (!CommonUtils.isEmpty(databaseName)) {
+            connection.setRequestProperty(LibSqlConstants.HEADER_NAMESPACE, encodeDatabaseName());
         }
         return connection;
+    }
+
+    @NotNull
+    private String encodeDatabaseName() {
+        // db_name is plain text in JDBC. sqld's x-namespace-bin HTTP metadata requires Base64:
+        // libsql-server/src/http/user/db_factory.rs, try_namespace_from_metadata (BASE64_STANDARD_NO_PAD).
+        return Base64.getEncoder().withoutPadding().encodeToString(databaseName.getBytes(StandardCharsets.UTF_8));
     }
 
     private void executeQuery(
