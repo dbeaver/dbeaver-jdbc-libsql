@@ -104,11 +104,12 @@ public class LibSqlUtils {
         try {
             URI uri = new URI(targetUrl);
             String query = uri.getRawQuery();
-            if (query == null) {
+            int queryStart = targetUrl.indexOf('?');
+            if (query == null || queryStart < 0) {
                 return targetUrl;
             }
             HttpUtils.parseQuery(query).forEach(properties::putIfAbsent);
-            return targetUrl.substring(0, targetUrl.indexOf('?'))
+            return targetUrl.substring(0, queryStart)
                 + (uri.getRawFragment() == null ? "" : "#" + uri.getRawFragment());
         } catch (URISyntaxException | IllegalArgumentException e) {
             throw new LibSqlException("Invalid connection URL", e);

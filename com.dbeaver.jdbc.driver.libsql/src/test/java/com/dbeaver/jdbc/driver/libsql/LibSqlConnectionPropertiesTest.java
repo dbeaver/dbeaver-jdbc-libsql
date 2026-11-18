@@ -65,12 +65,22 @@ public class LibSqlConnectionPropertiesTest {
 
     @Test
     public void preservesUrlsWithoutQuery() throws Exception {
-        for (String suffix : new String[] {"", "/", "#db_name=testdb"}) {
+        for (String suffix : new String[] {"", "/", "#db_name=testdb", "#fragment?db_name=testdb", "/db%3Fname"}) {
             Map<String, Object> properties = new HashMap<>();
             Assertions.assertEquals("https://server.example" + suffix, LibSqlUtils.parseUrlProperties(
                 "libsql://server.example" + suffix, properties));
             Assertions.assertTrue(properties.isEmpty());
         }
+    }
+
+    @Test
+    public void removingQueryPreservesRawEscapingAndFragmentQuestionMarks() throws Exception {
+        Map<String, Object> properties = new HashMap<>();
+        Assertions.assertEquals(
+            "https://server.example/db%2Fname%3Fpart#fragment?keep=%2F",
+            LibSqlUtils.parseUrlProperties(
+                "libsql://server.example/db%2Fname%3Fpart?db_name=tenant#fragment?keep=%2F", properties));
+        Assertions.assertEquals(Map.of("db_name", "tenant"), properties);
     }
 
     @Test

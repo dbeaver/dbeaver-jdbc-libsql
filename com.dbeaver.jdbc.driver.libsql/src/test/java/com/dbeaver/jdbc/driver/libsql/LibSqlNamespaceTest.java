@@ -122,6 +122,26 @@ public class LibSqlNamespaceTest {
     }
 
     @Test
+    public void explicitEntriesOverrideDefaultsAndPreserveNonStringValues() throws Exception {
+        Properties defaults = new Properties();
+        defaults.setProperty("db_name", "default-tenant");
+        defaults.setProperty("password", "default-token");
+        defaults.setProperty("custom", "default-value");
+        Properties properties = new Properties(defaults);
+        properties.setProperty("db_name", "explicit-tenant");
+        Object customValue = new Object();
+        properties.put("custom", customValue);
+        try (Connection connection = new LibSqlDriver().connect(
+            jdbcUrl() + "?db_name=url-tenant&password=url-token&custom=url-value", properties)) {
+            assertRequest("explicit-tenant", "Bearer default-token", "/");
+            Assertions.assertSame(customValue, ((LibSqlConnection) connection).getDriverProperties().get("custom"));
+            Assertions.assertEquals(2, properties.size());
+            Assertions.assertFalse(properties.containsKey("password"));
+            Assertions.assertEquals("default-tenant", defaults.getProperty("db_name"));
+        }
+    }
+
+    @Test
     public void namespaceIsIsolatedPerConnection() throws Exception {
         LibSqlDriver driver = new LibSqlDriver();
         try (Connection first = driver.connect(jdbcUrl() + "?db_name=tenant-one", new Properties());

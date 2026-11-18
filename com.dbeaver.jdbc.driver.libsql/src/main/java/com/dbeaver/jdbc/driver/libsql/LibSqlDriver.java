@@ -20,7 +20,6 @@ import org.jkiss.code.NotNull;
 import org.jkiss.code.Nullable;
 
 import java.sql.*;
-import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -45,10 +44,11 @@ public class LibSqlDriver implements Driver {
     @NotNull
     public Connection connect(@NotNull String url, @NotNull Properties info) throws SQLException {
         Map<String, Object> props = new LinkedHashMap<>();
-        for (Enumeration<?> pne = info.propertyNames(); pne.hasMoreElements(); ) {
-            String propName = (String) pne.nextElement();
-            props.put(propName, info.getOrDefault(propName, info.getProperty(propName)));
+        // Include inherited string defaults, then copy explicit entries (including non-string values).
+        for (String propName : info.stringPropertyNames()) {
+            props.put(propName, info.getProperty(propName));
         }
+        info.forEach((key, value) -> props.put((String) key, value));
         String targetUrl = LibSqlUtils.parseUrlProperties(url, props);
         return new LibSqlConnection(this, targetUrl, props);
     }
