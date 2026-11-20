@@ -36,6 +36,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -54,6 +55,8 @@ public class LibSqlClient {
 
     private final URL url;
     private final String authToken;
+    @Nullable
+    private final String databaseName;
     private final ExecutorService clientExecutor;
     private String userAgent = LibSqlConstants.DRIVER_INFO + " " +
         LibSqlConstants.DRIVER_VERSION_MAJOR +
@@ -61,9 +64,25 @@ public class LibSqlClient {
         "." + LibSqlConstants.DRIVER_VERSION_MICRO;
     private final HttpClient client;
 
-    public LibSqlClient(URL url, String authToken) {
+    /**
+     * Create a client from JDBC properties without making the legacy (url, null) constructor call ambiguous.
+     */
+    @NotNull
+    public static LibSqlClient fromProperties(@NotNull URL url, @NotNull Map<String, Object> properties) {
+        return new LibSqlClient(
+            url,
+            CommonUtils.toString(properties.get("password"), null),
+            CommonUtils.toString(properties.get(LibSqlConstants.PROP_DATABASE_NAME), null));
+    }
+
+    public LibSqlClient(@NotNull URL url, @Nullable String authToken) {
+        this(url, authToken, null);
+    }
+
+    public LibSqlClient(@NotNull URL url, @Nullable String authToken, @Nullable String databaseName) {
         this.url = url;
         this.authToken = authToken;
+        this.databaseName = databaseName;
 
         this.clientExecutor = Executors.newSingleThreadExecutor();
         HttpClient.Builder builder = HttpClient.newBuilder()
@@ -88,6 +107,7 @@ public class LibSqlClient {
     /**
      * Execute a batch of SQL statements.
      */
+    @NotNull
     public LibSqlExecutionResult[] executeBatch(
         @NotNull String[] stmts,
         @Nullable Map<Object, Object>[] parameters) throws SQLException {
@@ -103,6 +123,9 @@ public class LibSqlClient {
                 .POST(HttpRequest.BodyPublishers.ofString(requestBuffer.toString()));
             if (!CommonUtils.isEmpty(authToken)) {
                 builder.header(HttpConstants.HEADER_AUTHORIZATION, "Bearer " + authToken);
+            }
+            if (!CommonUtils.isEmpty(databaseName)) {
+                builder.header(LibSqlConstants.HEADER_NAMESPACE, encodeDatabaseName());
             }
 
             HttpResponse.BodyHandler<String> readerBodyHandler =
@@ -156,7 +179,8 @@ public class LibSqlClient {
 
     }
 
-    public HttpURLConnection openSimpleConnection(String endpoint) throws IOException {
+    @NotNull
+    public HttpURLConnection openSimpleConnection(@NotNull String endpoint) throws IOException {
         String baseURL = url.toString();
         if (!baseURL.endsWith("/")) {
             baseURL += "/";
@@ -167,7 +191,17 @@ public class LibSqlClient {
         if (!CommonUtils.isEmpty(authToken)) {
             connection.setRequestProperty(HttpConstants.HEADER_AUTHORIZATION, "Bearer " + authToken);
         }
+        if (!CommonUtils.isEmpty(databaseName)) {
+            connection.setRequestProperty(LibSqlConstants.HEADER_NAMESPACE, encodeDatabaseName());
+        }
         return connection;
+    }
+
+    @NotNull
+    private String encodeDatabaseName() {
+        // db_name is plain text in JDBC. sqld's x-namespace-bin HTTP metadata requires Base64:
+        // libsql-server/src/http/user/db_factory.rs, try_namespace_from_metadata (BASE64_STANDARD_NO_PAD).
+        return Base64.getEncoder().withoutPadding().encodeToString(databaseName.getBytes(StandardCharsets.UTF_8));
     }
 
     private void executeQuery(
